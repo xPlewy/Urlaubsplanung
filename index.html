@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Urlaubsplan</title>
+<meta name="description" content="Urlaubsplanung für die Praxis: Abwesenheiten, Urlaubskonten, Schließzeiten und Feiertage NRW.">
+<meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Urlaubsplan">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<style>
+html{color-scheme:light}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: iOS-artig. Inhalt auf festen, gruppierten Flächen; nur die schwebende Bedienebene (Tab-Leiste, Plus-Knopf, Rückgängig, Hinweise, Sheets) ist aus Glas.
+   Telefon: Tab-Leiste unten schwebend. Breit (iPad/Mac): Tab-Leiste oben mittig, klebend. */
+:root{
+  /* Flächen und Text (an Apples System-Farben angelehnt, Kontrast geprüft) */
+  --bg:#F2F2F7; --surface:#FFFFFF; --ink:#000000; --muted:#6C6C70; --line:rgb(60 60 67 / .18); --soft:rgb(118 118 128 / .12); --raised:#FFFFFF;
+  --accent:#0A7A87; --accent-ink:#FFFFFF; --weekend:rgb(118 118 128 / .08); --holiday:#FFF1DE; --holiday-ink:#9A4A00;
+  --t-urlaub:#0A7A87; --t-krank:#C7254E; --t-fort:#B35C00; --t-sonst:#5856D6; --closure:#8E8E93;
+  --warn:#D70015; --ok:#248A3D; --ferien:#34C759; --heat:#0A7A87;
+  /* Glas */
+  --glass:rgb(255 255 255 / .62); --glass-strong:rgb(250 250 252 / .86); --glass-edge:rgb(255 255 255 / .75); --glass-hi:rgb(255 255 255 / .9); --glass-shadow:0 10px 34px rgb(0 0 0 / .14), 0 1px 3px rgb(0 0 0 / .08);
+  --f-ui:-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
+  --f-display:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", Roboto, sans-serif;
+  --r-card:20px; --r-ctl:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --surface:#1C1C1E; --ink:#FFFFFF; --muted:#A1A1A8; --line:rgb(84 84 88 / .65); --soft:rgb(118 118 128 / .24); --raised:#2C2C2E;
+  --accent:#5AC8D8; --accent-ink:#00262C; --weekend:rgb(118 118 128 / .14); --holiday:#3A2A12; --holiday-ink:#FFB866;
+  --t-urlaub:#0A7A87; --t-krank:#C7254E; --t-fort:#B35C00; --t-sonst:#5856D6; --closure:#8E8E93;
+  --warn:#FF6961; --ok:#30D158; --ferien:#30D158; --heat:#2FA3B2;
+  --glass:rgb(40 40 44 / .55); --glass-strong:rgb(36 36 40 / .86); --glass-edge:rgb(255 255 255 / .14); --glass-hi:rgb(255 255 255 / .22); --glass-shadow:0 10px 34px rgb(0 0 0 / .5), 0 1px 3px rgb(0 0 0 / .4);
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#000000; --surface:#1C1C1E; --ink:#FFFFFF; --muted:#A1A1A8; --line:rgb(84 84 88 / .65); --soft:rgb(118 118 128 / .24); --raised:#2C2C2E;
+  --accent:#5AC8D8; --accent-ink:#00262C; --weekend:rgb(118 118 128 / .14); --holiday:#3A2A12; --holiday-ink:#FFB866;
+  --t-urlaub:#0A7A87; --t-krank:#C7254E; --t-fort:#B35C00; --t-sonst:#5856D6; --closure:#8E8E93;
+  --warn:#FF6961; --ok:#30D158; --ferien:#30D158; --heat:#2FA3B2;
+  --glass:rgb(40 40 44 / .55); --glass-strong:rgb(36 36 40 / .86); --glass-edge:rgb(255 255 255 / .14); --glass-hi:rgb(255 255 255 / .22); --glass-shadow:0 10px 34px rgb(0 0 0 / .5), 0 1px 3px rgb(0 0 0 / .4);
+  color-scheme:dark }
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:17px;line-height:1.35;letter-spacing:-.01em;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:8px calc(112px + env(safe-area-inset-bottom,0px))}
+@media (min-width:900px){body{font-size:15px;padding-block:14px 48px}}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance}
+h1{font-size:34px;font-weight:700;letter-spacing:.01em;line-height:1.15}
+h2{font-size:22px;font-weight:700;letter-spacing:-.01em}
+h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);font-family:var(--f-ui)}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 60%,transparent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- Liquid Glass: nur für die schwebende Bedienebene ---------- */
+.glass{position:relative;background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(180%);backdrop-filter:blur(22px) saturate(180%);
+  border:1px solid var(--glass-edge);box-shadow:var(--glass-shadow),inset 0 1px 0 var(--glass-hi)}
+.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg,rgb(255 255 255 / .35),rgb(255 255 255 / 0) 45%);mix-blend-mode:soft-light}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:var(--glass-strong)}}
+@media (prefers-reduced-transparency:reduce){.glass{background:var(--raised);-webkit-backdrop-filter:none;backdrop-filter:none}.glass::before{display:none}}
+@media (prefers-contrast:more){.glass{background:var(--raised);border-color:var(--ink)}}
+
+/* Kopf */
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:8px}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+.brand p{margin:0;color:var(--muted);font-size:15px}
+.undo{border-radius:999px;padding:0 16px 0 12px;min-height:44px;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:15px;color:var(--accent);border:0;flex:0 0 auto}
+.undo svg{width:20px;height:20px}
+.undo[hidden]{display:none}
+@media (max-width:520px){.undo{width:44px;padding:0;justify-content:center}.undo .ul{display:none}}
+
+/* Tab-Leiste (schwebend) */
+.tabbar{position:fixed;z-index:40;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  display:flex;gap:2px;padding:5px;border-radius:999px;max-width:calc(100% - 32px - 64px)}
+.tabbar button{position:relative;border:0;background:transparent;display:flex;flex-direction:column;align-items:center;gap:2px;
+  min-width:68px;min-height:54px;padding:6px 10px;border-radius:999px;color:var(--ink);font-size:11px;font-weight:600;letter-spacing:0}
+.tabbar button svg{width:24px;height:24px}
+.tabbar button[aria-selected="true"]{color:var(--accent)}
+.tabbar button{z-index:1}
+.tabind{position:absolute;left:0;top:0;border-radius:999px;background:var(--soft);z-index:0;pointer-events:none;
+  box-shadow:inset 0 1px 0 var(--glass-hi);will-change:transform,width}
+.tabbar button[aria-selected="true"] svg .fill{fill:currentColor}
+.tabbar button[aria-selected="true"] svg{--tab-line:var(--surface)}
+.badge{position:absolute;top:3px;right:calc(50% - 22px);min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:#FF3B30;color:#fff;font-size:11px;font-weight:700;line-height:18px;text-align:center}
+.fab{position:fixed;z-index:40;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:0;color:var(--accent-ink)}
+.fab.glass{background:color-mix(in srgb,var(--accent) 82%,transparent)}
+.fab svg{width:28px;height:28px}
+@media (max-width:420px){.tabbar{left:max(12px,env(safe-area-inset-left,0px));transform:none;max-width:none;right:calc(max(12px,env(safe-area-inset-right,0px)) + 72px)}
+  .tabbar button{min-width:0;flex:1;padding:6px 4px}.fab{width:60px;height:60px;right:max(12px,env(safe-area-inset-right,0px))}}
+@media (min-width:900px){
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+  .tabbar{position:sticky;top:calc(10px + env(safe-area-inset-top,0px));bottom:auto;align-self:center;transform:none;left:auto;max-width:none;margin-top:-6px}
+  .tabbar button{flex-direction:row;gap:7px;min-height:40px;font-size:14px;padding:6px 16px}
+  .tabbar button svg{width:19px;height:19px}
+  .badge{position:static;margin-left:2px}
+  .fab{display:none}
+}
+@media (max-width:899px){.wideonly{display:none!important}}
+
+/* Knöpfe */
+.btn{border:0;background:var(--soft);color:var(--accent);padding:0 16px;min-height:44px;border-radius:999px;font-weight:600;font-size:15px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.danger{color:var(--warn);background:var(--soft)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:default}
+.btn:not(:disabled):active,.iconbtn:active{transform:scale(.97)}
+.btn.sm{min-height:34px;padding:0 12px;font-size:14px}
+.iconbtn{border:0;background:var(--soft);color:var(--accent);width:44px;height:44px;border-radius:50%;display:inline-grid;place-items:center;font-size:22px;font-weight:500;line-height:1}
+.iconbtn.sm{width:34px;height:34px;font-size:16px}
+.iconbtn:disabled{opacity:.35;cursor:default}
+@media (min-width:900px){.btn{min-height:36px}.iconbtn{width:36px;height:36px;font-size:19px}}
+.ghead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;padding-inline:4px}
+.gtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.monthnav{display:flex;align-items:center;gap:8px}
+.monthnav .label{font-family:var(--f-display);font-size:22px;font-weight:700;min-width:9.5ch;text-align:center}
+
+/* Inhalt: feste Flächen */
+.panel{background:var(--surface);border-radius:var(--r-card)}
+.banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--r-card);background:var(--holiday);color:var(--holiday-ink);font-size:15px}
+.banner .btn{background:rgb(255 255 255 / .55);color:inherit}
+.subnav{display:flex;justify-content:center}
+
+/* Segmentierte Steuerung */
+.seg2{position:relative;display:inline-grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--soft);border-radius:10px;padding:2px;gap:0}
+.seg2 .thumb{position:absolute;top:2px;bottom:2px;left:2px;width:calc((100% - 4px) / var(--n,2));transform:translateX(calc(var(--i,0) * 100%));border-radius:8px;background:var(--raised);box-shadow:0 3px 8px rgb(0 0 0 / .12),0 0 0 .5px rgb(0 0 0 / .04);pointer-events:none}
+.seg2 button{position:relative;z-index:1}
+.seg2 button{border:0;background:transparent;padding:0 14px;min-height:32px;border-radius:8px;font-weight:500;font-size:14px;color:var(--ink)}
+.seg2 button[aria-pressed="true"]{font-weight:600}
+.subnav .seg2 button{min-height:36px;padding:0 18px}
+
+/* Kalender-Raster */
+.gridwrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--r-card)}
+table.grid{border-collapse:separate;border-spacing:0;font-size:13px}
+.grid th,.grid td{border-bottom:.5px solid var(--line);padding:0}
+.grid thead th{position:sticky;top:0;background:var(--surface);z-index:2}
+.grid .name{position:sticky;left:0;z-index:3;background:var(--surface);text-align:left;min-width:132px;max-width:150px;padding:0 12px;border-right:.5px solid var(--line)}
+.grid thead .name{z-index:4}
+.grid .dayh{width:34px;min-width:34px;text-align:center;font-weight:500;padding:8px 0;color:var(--muted)}
+.dayh span{display:block;font-size:11px;font-weight:600}
+.dayh b{display:block;font-size:15px;color:var(--ink);font-weight:600}
+.dayh.today b{background:#FF3B30;color:#fff;border-radius:999px;width:26px;height:26px;line-height:26px;margin:0 auto}
+.grid .we{background:var(--weekend)}
+.grid .hol{background:var(--holiday)}
+.grid .hol b{color:var(--holiday-ink)}
+.grid tr.grp th{background:var(--surface);text-align:left;padding:14px 12px 4px;font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);font-weight:600}
+.grid tr.grp td{background:var(--surface)}
+.namebtn{border:0;background:none;padding:8px 0;text-align:left;width:100%;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.namebtn small{display:block;color:var(--muted);font-weight:400;font-size:12px}
+td.cell{height:44px;position:relative}
+td.cell button{position:absolute;inset:4px 2px;border:0;border-radius:8px;background:transparent;width:calc(100% - 4px)}
+td.cell button:hover{background:var(--soft)}
+td.cell.off button{background:repeating-linear-gradient(135deg,transparent 0 4px,var(--line) 4px 5px)}
+td.cell.e button{color:#fff;font-weight:700;font-size:12px}
+td.cell.t-urlaub button{background:var(--t-urlaub)}
+td.cell.t-krank button{background:var(--t-krank)}
+td.cell.t-fortbildung button{background:var(--t-fort)}
+td.cell.t-sonstiges button{background:var(--t-sonst)}
+td.cell.half.e button{background:linear-gradient(135deg,var(--tc) 0 50%,transparent 50%)}
+td.cell.half.t-urlaub{--tc:var(--t-urlaub)} td.cell.half.t-krank{--tc:var(--t-krank)} td.cell.half.t-fortbildung{--tc:var(--t-fort)} td.cell.half.t-sonstiges{--tc:var(--t-sonst)}
+td.cell.closed:not(.e) button{background:repeating-linear-gradient(45deg,var(--closure) 0 3px,transparent 3px 7px);opacity:.7}
+tr.pres th{font-size:12px;color:var(--muted);font-weight:500;padding:6px 12px}
+tr.pres td{text-align:center;font-size:11px;color:var(--muted);height:28px}
+tr.pres td.low{color:var(--warn);font-weight:700}
+.dayh.fer{box-shadow:inset 0 -3px 0 var(--ferien)}
+.minb{display:inline-block;margin-left:4px;font-size:11px;color:var(--muted);background:var(--soft);border-radius:6px;padding:0 5px}
+
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;font-size:13px;color:var(--muted);align-items:center;padding-inline:4px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.holist{font-size:13px;color:var(--muted);padding-inline:4px}
+.holist b{color:var(--holiday-ink);font-weight:600}
+
+/* Jahresansicht */
+.field.inline{flex-direction:row;align-items:center;gap:8px}
+.field.inline select{width:auto;max-width:220px;min-height:36px;padding:0 10px}
+.grid.year .name{min-width:104px}
+td.yc{width:30px;min-width:30px;height:34px;position:relative;text-align:center}
+td.yc button{position:absolute;inset:3px;border:0;border-radius:7px;background:transparent;font-size:12px;font-weight:700;color:var(--ink);width:calc(100% - 6px)}
+td.yc.none{background:var(--weekend)}
+td.yc.fer{box-shadow:inset 0 -3px 0 var(--ferien)}
+td.yc.today button{outline:2px solid #FF3B30;outline-offset:-2px}
+td.yc.lv1 button,.legend i.lv1{background:color-mix(in srgb,var(--heat) 22%,transparent)}
+td.yc.lv2 button,.legend i.lv2{background:color-mix(in srgb,var(--heat) 45%,transparent)}
+td.yc.lv3 button,.legend i.lv3{background:color-mix(in srgb,var(--heat) 75%,transparent);color:#fff}
+td.yc.lv4 button,.legend i.lv4{background:var(--t-urlaub);color:#fff}
+td.yc.low button{box-shadow:inset 0 0 0 2px var(--warn)}
+td.yc.closed button{background:repeating-linear-gradient(45deg,var(--closure) 0 3px,transparent 3px 7px)}
+td.yc.e button{color:#fff}
+td.yc.t-urlaub button{background:var(--t-urlaub)}td.yc.t-krank button{background:var(--t-krank)}td.yc.t-fortbildung button{background:var(--t-fort)}td.yc.t-sonstiges button{background:var(--t-sonst)}
+.legend i.pill{border-radius:4px}
+
+/* Tabelle Urlaubskonten */
+.tablewrap{overflow-x:auto;border-radius:var(--r-card)}
+table.list{width:100%;border-collapse:collapse;font-size:15px}
+.list th,.list td{padding:12px 14px;border-bottom:.5px solid var(--line);text-align:left;white-space:nowrap}
+.list th{font-size:12px;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);font-weight:600}
+.list td.r,.list th.r{text-align:right}
+.list tr.click{cursor:pointer}
+.list tr.click:hover td{background:var(--soft)}
+.list tr.sub td{background:var(--bg);font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.02em;color:var(--muted);padding-top:16px}
+.rest{font-weight:700}
+.rest.neg{color:var(--warn)}
+.bar{height:6px;border-radius:99px;background:var(--soft);overflow:hidden;min-width:80px;display:flex}
+.bar span{display:block;height:100%}
+.detail td{background:var(--bg);white-space:normal}
+.elist{display:flex;flex-direction:column;gap:8px;padding:4px 0}
+.erow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:15px}
+.erow button{border:0;background:var(--soft);color:var(--accent);border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
+.pill{display:inline-block;padding:2px 9px;border-radius:99px;font-size:12px;font-weight:600;color:#fff}
+.pill.t-urlaub{background:var(--t-urlaub)}.pill.t-krank{background:var(--t-krank)}.pill.t-fortbildung{background:var(--t-fort)}.pill.t-sonstiges{background:var(--t-sonst)}
+
+/* Listen / Karten */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+.card{background:var(--surface);border-radius:16px;padding:14px 16px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.card .meta{color:var(--muted);font-size:14px}
+.card > div{min-width:0}
+.card.past{opacity:.55}
+.section{display:flex;flex-direction:column;gap:12px}
+.wd{display:inline-flex;gap:3px}
+.wd span{font-size:11px;width:22px;text-align:center;border-radius:6px;padding:2px 0;background:var(--soft);color:var(--muted);font-weight:600}
+.wd span.on{background:var(--accent);color:var(--accent-ink)}
+.empty{padding:32px 20px;text-align:center;color:var(--muted);display:flex;flex-direction:column;gap:10px;align-items:center;font-size:15px}
+.empty strong{color:var(--ink);font-family:var(--f-display);font-size:20px}
+.status{padding:40px 20px;text-align:center;color:var(--muted)}
+
+/* Übersicht */
+.ovgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:12px;align-items:start}
+.ovcard{padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.ovcard header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.ovcard header > div{min-width:0}
+.ovcard .meta{color:var(--muted);font-size:14px}
+.ovrest{text-align:right;display:flex;flex-direction:column;line-height:1.05}
+.ovrest b{font-family:var(--f-display);font-size:34px;font-weight:700;color:var(--accent)}
+.ovrest.neg b{color:var(--warn)}
+.ovrest span{font-size:12px;color:var(--muted);font-weight:500}
+.ovstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:10px;margin:0;padding:12px;border-radius:14px;background:var(--bg)}
+.ovstats dt{font-size:12px;color:var(--muted);font-weight:500}
+.ovstats dd{margin:0;font-weight:600;font-size:17px}
+.ovstats small{font-weight:400;color:var(--muted);font-size:12px}
+.ovsec{display:flex;flex-direction:column;gap:6px}
+.ovhead{display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted);font-weight:600}
+.ovlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.ovrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;width:100%;text-align:left;border:0;background:transparent;padding:10px 4px;border-bottom:.5px solid var(--line);font-size:15px;min-height:44px}
+button.ovrow:hover{background:var(--soft)}
+.ovdate{flex:1 1 auto;min-width:0}
+.ovn{font-weight:600;order:3;margin-left:auto}
+.ovnote{flex-basis:100%;order:4;color:var(--muted);font-size:13px}
+.chip{order:2;font-size:11px;font-weight:600;color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);border-radius:99px;padding:1px 8px}
+
+/* Notizen */
+.noteform{padding:16px;display:flex;flex-direction:column;gap:10px}
+.notes{display:flex;flex-direction:column;gap:8px}
+.note .ntext{white-space:pre-wrap;overflow-wrap:anywhere}
+
+/* Sheets (Dialoge): schwebend, Glas mit hoher Deckkraft */
+.overlay{position:fixed;inset:0;background:rgb(0 0 0 / .32);display:flex;align-items:flex-end;justify-content:center;z-index:50;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) 0 env(safe-area-inset-left,0px)}
+@media (min-width:640px){.overlay{align-items:center}}
+.dialog{width:100%;max-width:480px;max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;padding:10px 20px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.dialog.glass{background:var(--glass-strong)}
+.dialog::after{content:"";order:-1;align-self:center;width:36px;height:5px;border-radius:3px;background:var(--line);flex:0 0 auto}
+@media (min-width:640px){.dialog{border-radius:28px;padding-top:22px}.dialog::after{display:none}}
+.dialog h2{text-align:center;font-size:17px;font-weight:600;letter-spacing:-.02em}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label,.flabel{font-size:13px;font-weight:500;color:var(--muted);padding-left:4px}
+.field input,.field select,.field textarea{border:0;background:var(--soft);border-radius:var(--r-ctl);padding:0 14px;min-height:44px;width:100%;min-width:0;font-size:17px}
+.field textarea{padding:12px 14px}
+.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--accent);outline-offset:0}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.datein.seg{position:relative;display:flex;align-items:center;background:var(--soft);border-radius:var(--r-ctl);padding:0 44px 0 8px;min-width:0;min-height:44px}
+.datein.seg:focus-within{outline:2px solid var(--accent)}
+.datein.seg.bad{outline:2px solid var(--warn)}
+.datein.seg.bad input{color:var(--warn)}
+.field .datein.seg input{background:transparent;padding:0 2px;min-height:36px;text-align:center;font-size:17px;border-radius:6px;font-variant-numeric:tabular-nums}
+.field .datein.seg input:focus{outline:none;background:color-mix(in srgb,var(--accent) 18%,transparent)}
+.datein .dd,.datein .mm{width:2.7ch;flex:0 0 auto}
+.datein .yy{width:4.9ch;flex:0 0 auto}
+.datein .dot{color:var(--muted)}
+.pick{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:38px;height:38px;display:grid;place-items:center;border-radius:10px;font-size:18px;overflow:hidden}
+.pick input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
+.check{display:flex;gap:10px;align-items:center;font-size:17px;min-height:44px}
+.check input{width:22px;height:22px;accent-color:var(--accent)}
+.days{display:flex;gap:6px;flex-wrap:wrap}
+.days label{display:flex;align-items:center;gap:6px;background:var(--soft);border-radius:999px;padding:0 12px;min-height:40px;font-size:15px}
+.days input{accent-color:var(--accent)}
+.hint{font-size:14px;color:var(--muted);background:var(--soft);border-radius:var(--r-ctl);padding:10px 12px}
+.hint.warn{color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent)}
+.actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap}
+.actions .right{display:flex;gap:8px;margin-left:auto}
+.confirm{background:color-mix(in srgb,var(--warn) 10%,transparent);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+
+/* Anmeldung & Konto */
+.hdr-right{display:flex;align-items:center;gap:10px}
+.acct{width:44px;height:44px;border-radius:50%;padding:0;border:0;overflow:hidden;display:grid;place-items:center;color:var(--accent);font-weight:700;font-size:18px}
+.acct img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+body.signedout .tabbar,body.signedout .fab,body.signedout .undo{display:none!important}
+.login{display:grid;place-items:center;min-height:60vh}
+.loginbox{max-width:420px;width:100%;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.loginbox p{margin:0;color:var(--muted);font-size:16px;line-height:1.45}
+.appicon{width:84px;height:84px;border-radius:20px;box-shadow:0 6px 18px rgb(0 0 0 / .18)}
+.gbtn{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:50px;padding:0 22px;border-radius:999px;border:1px solid #DADCE0;background:#fff;color:#1F1F1F;font-weight:600;font-size:16px;margin-top:6px;width:100%}
+.gbtn svg{width:22px;height:22px}
+.gbtn:disabled{opacity:.6}
+.acctinfo{display:flex;gap:14px;align-items:center}
+.acctinfo img{width:56px;height:56px;border-radius:50%}
+.acctinfo .meta{color:var(--muted);font-size:14px}
+
+/* Hinweis unten (schwebend, Glas) */
+.toast{width:max-content;display:flex;align-items:center;gap:14px;max-width:calc(100% - 32px);position:fixed;left:50%;transform:translateX(-50%);
+  bottom:calc(92px + env(safe-area-inset-bottom,0px));padding:0 8px 0 18px;min-height:48px;border-radius:99px;font-size:15px;font-weight:500;z-index:60;color:var(--ink)}
+.toast:not(:has(button)){padding-right:18px}
+.toast button{border:0;background:var(--accent);color:var(--accent-ink);font-weight:600;padding:0 14px;min-height:36px;border-radius:99px;white-space:nowrap}
+@media (min-width:900px){.toast{bottom:calc(24px + env(safe-area-inset-bottom,0px))}}
+
+@media (prefers-reduced-motion:no-preference){
+  :root{--spring:cubic-bezier(.32,1.25,.5,1);--ease-out:cubic-bezier(.22,1,.36,1)}
+  @supports (transition-timing-function:linear(0,1)){:root{--spring:linear(0,.009,.035 2.1%,.141 4.4%,.723 12.9%,.938,1.077 20.4%,1.121,1.141 26%,1.138,1.12 31.4%,1.035 41.9%,1.008 47%,.993 53.6%,.998 66.3%,1)}}
+  .tabind{transition:transform .5s var(--spring),width .5s var(--spring),height .5s var(--spring)}
+  .seg2 .thumb{transition:transform .42s var(--spring)}
+  .noanim{transition:none!important}
+  .tabbar button:active svg{transform:scale(.86)}
+  .tabbar button svg{transition:transform .25s var(--spring)}
+  .vt-left{animation:vtLeft .42s var(--ease-out)}@keyframes vtLeft{from{transform:translateX(28px);opacity:0}}
+  .vt-right{animation:vtRight .42s var(--ease-out)}@keyframes vtRight{from{transform:translateX(-28px);opacity:0}}
+  .vt-zoom{animation:vtZoom .4s var(--ease-out)}@keyframes vtZoom{from{transform:scale(.97);opacity:0}}
+  .overlay{animation:dim .3s ease-out}@keyframes dim{from{background:rgb(0 0 0 / 0)}}
+  .overlay.closing{animation:undim .28s ease-in forwards}@keyframes undim{to{background:rgb(0 0 0 / 0)}}
+  .overlay.closing .dialog{animation:down .28s cubic-bezier(.4,0,.8,.4) forwards}@keyframes down{to{transform:translateY(60%);opacity:0}}
+  @media (min-width:640px){.overlay.closing .dialog{animation-name:shrink}@keyframes shrink{to{transform:scale(.94);opacity:0}}
+    .dialog{animation-name:grow!important}@keyframes grow{from{transform:scale(.94);opacity:0}}}
+  .toast.out:not([hidden]){animation:toastOut .22s ease-in forwards}@keyframes toastOut{to{transform:translate(-50%,10px) scale(.96);opacity:0}}
+  .undo:not([hidden]){animation:popIn .45s var(--spring)}@keyframes popIn{from{transform:scale(.6);opacity:0}}
+  .fab:not([hidden]){animation:popIn .5s var(--spring)}
+  .card,.ovcard,.panel{transition:transform .25s var(--ease-out)}
+  .dialog{animation:up .5s var(--spring)}@keyframes up{from{transform:translateY(100%)}}
+  .toast:not([hidden]){animation:pop .28s cubic-bezier(.2,.9,.25,1.2)}@keyframes pop{from{transform:translate(-50%,12px) scale(.96);opacity:0}}
+  .tabbar button,.btn,.iconbtn{transition:background-color .2s,color .2s,transform .12s}
+}
+@media (max-width:520px){h1{font-size:30px}.monthnav .label{font-size:19px;min-width:8.5ch}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>Urlaubsplan</h1>
+      <p>Praxis · Feiertage NRW</p>
+    </div>
+    <div class="hdr-right">
+    <button class="undo glass" id="undoBtn" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg><span class="ul">Rückgängig</span></button>
+    <button class="acct glass" id="acctBtn" aria-label="Konto" hidden></button>
+    </div>
+  </header>
+  <nav class="tabbar glass" role="tablist" id="tabs" aria-label="Bereiche">
+    <span class="tabind" aria-hidden="true"></span>
+    <button role="tab" data-v="kalender"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect class="fill" x="3.5" y="5" width="17" height="15.5" rx="3.5" fill="none"/><path d="M3.5 9.5h17M8 3v4M16 3v4" stroke-width="1.8"/><path d="M7.5 13.5h2M11 13.5h2M14.5 13.5h2M7.5 17h2M11 17h2" stroke="var(--tab-line,currentColor)"/></svg><span>Kalender</span></button>
+    <button role="tab" data-v="uebersicht"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle class="fill" cx="9" cy="8.5" r="3.5"/><path class="fill" d="M2.8 19.5c.7-3.4 3.2-5.3 6.2-5.3s5.5 1.9 6.2 5.3z"/><path d="M15.5 5.5a3.3 3.3 0 0 1 0 6M17.5 14.6c2 .7 3.3 2.3 3.7 4.9"/></svg><span>Übersicht</span></button>
+    <button role="tab" data-v="notizen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="fill" d="M6 3.5h9l4 4v11.5a1.5 1.5 0 0 1-1.5 1.5h-11.5a1.5 1.5 0 0 1-1.5-1.5v-14a1.5 1.5 0 0 1 1.5-1.5z"/><path d="M8.5 11h7M8.5 14.5h7M8.5 18h4" stroke="var(--tab-line,currentColor)"/></svg><span>Notizen</span><span class="badge" id="notesBadge" hidden></span></button>
+    <button role="tab" data-v="team"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="fill" d="M4 20.5V9.2L12 4l8 5.2v11.3z"/><path d="M10 20.5v-5h4v5M12 8v4M10 10h4" stroke="var(--tab-line,currentColor)"/></svg><span>Praxis</span></button>
+  </nav>
+  <div id="banner"></div>
+  <main id="main"><div class="status">Daten werden geladen …</div></main>
+</div>
+<button class="fab glass" id="fab" aria-label="Abwesenheit eintragen" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+<div id="modal"></div>
+<div id="toast" class="toast glass" role="status" aria-live="polite" hidden></div>
+
+<script>
+const DEFAULT_GROUPS=[{k:"arzt",l:"Ärztinnen & Ärzte",min:0},{k:"mfa",l:"MFA",min:0},{k:"azubi",l:"Auszubildende",min:0}];
+function ferienOn(d){return S.ferien.find(f=>f.from<=d&&d<=f.to)}
+function groupOf(p){return groups().find(g=>g.k===p.group)}
+/* Wie viele aus dem Team sind an Tag d da? skip = Eintrags-ID, die ignoriert wird; extra = Person, die zusätzlich fehlt */
+function presence(gk,d,idx,skip,extra){const c=closureOn(d);let need=0,pres=0;
+  for(const p of staffSorted(gk)){if(!isWork(p,d))continue;need++;const e=idx.get(p.id+"|"+d);
+    const away=(e&&e.id!==skip)||p.id===extra;if(!away&&!c)pres++}
+  return{need,pres,closed:!!c}}
+function understaffed(g,d,idx){if(!g||!g.min)return false;const r=presence(g.k,d,idx);return r.need>0&&!r.closed&&r.pres<g.min}
+function groups(){
+  const gs=S.groups.length?[...S.groups].sort((a,b)=>(a.order??0)-(b.order??0)||(a.label||"").localeCompare(b.label||"","de")).map(g=>({k:g.id,l:g.label||"Team",order:g.order??0,min:Number(g.min)||0})):DEFAULT_GROUPS;
+  const keys=new Set(gs.map(g=>g.k));
+  return S.staff.some(p=>!keys.has(p.group))?[...gs,{k:"_none",l:"Ohne Team",none:true}]:gs}
+const TYPES=[{k:"urlaub",l:"Urlaub",a:"U"},{k:"krank",l:"Abwesend",a:"A"},{k:"fortbildung",l:"Fortbildung",a:"F"},{k:"sonstiges",l:"Sonstiges",a:"S"}];
+const MONTHS=["Januar","Februar","März","April","Mai","Juni","Juli","August","September","Oktober","November","Dezember"];
+const WD=["So","Mo","Di","Mi","Do","Fr","Sa"];
+const now=new Date();
+const TODAY=iso(now.getFullYear(),now.getMonth(),now.getDate());
+const S={staff:[],entries:[],closures:[],groups:[],notes:[],ferien:[],calMode:"monat",yearFilter:"",ovPerson:"",loaded:{staff:0,entries:0,closures:0,groups:0,notes:0,ferien:0},view:"kalender",year:now.getFullYear(),month:now.getMonth(),
+  canWrite:true,db:null,error:null,open:null};
+try{const v=localStorage.getItem("up.view");if(v)S.view=v}catch(e){}
+
+/* ---------- Datum & Feiertage ---------- */
+function pad(n){return String(n).padStart(2,"0")}
+function iso(y,m,d){const t=new Date(Date.UTC(y,m,d));return t.getUTCFullYear()+"-"+pad(t.getUTCMonth()+1)+"-"+pad(t.getUTCDate())}
+function parse(s){const[y,m,d]=s.split("-").map(Number);return new Date(Date.UTC(y,m-1,d))}
+function addDays(s,n){const t=parse(s);t.setUTCDate(t.getUTCDate()+n);return iso(t.getUTCFullYear(),t.getUTCMonth(),t.getUTCDate())}
+function dow(s){return parse(s).getUTCDay()}
+function fmt(s,withYear=true){const[y,m,d]=s.split("-");return d+"."+m+"."+(withYear?y:"")}
+function fmtRange(a,b){return a===b?WD[dow(a)]+", "+fmt(a):fmt(a,a.slice(0,4)!==b.slice(0,4))+" – "+fmt(b)}
+function nf(n){return n.toLocaleString("de-DE",{maximumFractionDigits:1})}
+function easter(y){const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
+  h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;return iso(y,mo-1,da)}
+const holCache={};
+function holidays(y){if(holCache[y])return holCache[y];const e=easter(y);const h={};
+  h[iso(y,0,1)]="Neujahr";h[addDays(e,-2)]="Karfreitag";h[addDays(e,1)]="Ostermontag";h[iso(y,4,1)]="Tag der Arbeit";
+  h[addDays(e,39)]="Christi Himmelfahrt";h[addDays(e,50)]="Pfingstmontag";h[addDays(e,60)]="Fronleichnam";
+  h[iso(y,9,3)]="Tag der Deutschen Einheit";h[iso(y,10,1)]="Allerheiligen";h[iso(y,11,25)]="1. Weihnachtstag";h[iso(y,11,26)]="2. Weihnachtstag";
+  return holCache[y]=h}
+function holName(s){return holidays(+s.slice(0,4))[s]}
+function workdaysOf(p){return Array.isArray(p.workdays)&&p.workdays.length?p.workdays:[1,2,3,4,5]}
+function isWork(p,s){return workdaysOf(p).includes(dow(s))&&!holName(s)}
+function eachDay(a,b,fn){if(!a||!b||b<a)return;let d=a,guard=0;while(d<=b&&guard++<800){fn(d);d=addDays(d,1)}}
+function countWork(p,a,b,half){let n=0;eachDay(a,b,d=>{if(isWork(p,d))n++});return half&&a===b&&n?0.5:n}
+
+/* ---------- Berechnungen ---------- */
+function account(p,y){
+  const map=new Map(),ys=y+"-01-01",ye=y+"-12-31";
+  let krank=0,fort=0;
+  for(const e of S.entries){ if(e.staffId!==p.id)continue;
+    const a=e.from>ys?e.from:ys,b=e.to<ye?e.to:ye;
+    if(e.type==="urlaub") eachDay(a,b,d=>{if(isWork(p,d))map.set(d,e.half&&e.from===e.to?0.5:1)});
+    else if(e.type==="krank") krank+=countWork(p,a,b,e.half);
+    else if(e.type==="fortbildung") fort+=countWork(p,a,b,e.half);
+  }
+  for(const c of S.closures){ if(!c.deduct)continue;const a=c.from>ys?c.from:ys,b=c.to<ye?c.to:ye;
+    eachDay(a,b,d=>{if(isWork(p,d)&&!map.has(d))map.set(d,1)}) }
+  let taken=0,planned=0;for(const[d,v]of map){if(d<=TODAY)taken+=v;else planned+=v}
+  const base=Number(p.days)||0,carry=Number((p.carry||{})[y])||0;
+  return{base,carry,total:base+carry,taken,planned,rest:base+carry-taken-planned,krank,fort}
+}
+function entryIndex(){const idx=new Map();for(const e of S.entries)eachDay(e.from,e.to,d=>idx.set(e.staffId+"|"+d,e));return idx}
+function closureOn(d){return S.closures.find(c=>c.from<=d&&d<=c.to)}
+function staffSorted(g){const keys=new Set(groups().map(x=>x.k));return S.staff.filter(p=>g==="_none"?!keys.has(p.group):p.group===g).sort((a,b)=>(a.name||"").localeCompare(b.name||"","de"))}
+
+/* ---------- Hilfen ---------- */
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $=s=>document.querySelector(s);
+let toastT;function toast(t,undo){const el=$("#toast");el.innerHTML=`<span>${esc(t)}</span>${undo?`<button type="button">Rückgängig</button>`:""}`;el.hidden=false;
+  el.classList.remove("out");
+  if(undo)el.querySelector("button").onclick=()=>{hideToast();doUndo()};clearTimeout(toastT);toastT=setTimeout(hideToast,undo?7000:2600)}
+function hideToast(){const el=$("#toast");if(el.hidden)return;if(reduceMotion()){el.hidden=true;return}el.classList.add("out");setTimeout(()=>{if(el.classList.contains("out")){el.hidden=true;el.classList.remove("out")}},220)}
+/* Rückgängig: jede Änderung merkt sich den Zustand davor */
+let lastUndo=null;
+function tracked(db,log){
+  const before=(c,id)=>{const x=(S[c]||[]).find(x=>x.id===id);if(!x)return null;const o={...x};delete o.id;return JSON.parse(JSON.stringify(o))};
+  return{collection:c=>{const col=db.collection(c);return{
+    doc:id=>{const d=col.doc(id);return{
+      set:async v=>{log.push({c,id,before:before(c,id)});return d.set(v)},
+      update:async v=>{log.push({c,id,before:before(c,id)});return d.update(v)},
+      delete:async()=>{log.push({c,id,before:before(c,id)});return d.delete()}}},
+    add:async v=>{const r=await col.add(v);log.push({c,id:r.id,before:null});return r}}}}}
+function setUndo(label,log){lastUndo=log.length?{label,log}:null;
+  const b=$("#undoBtn");b.hidden=!lastUndo;if(lastUndo){b.title="Rückgängig: "+label;b.setAttribute("aria-label","Rückgängig: "+label)}}
+async function doUndo(){if(!lastUndo||!S.db)return;const {log}=lastUndo;lastUndo=null;$("#undoBtn").hidden=true;
+  try{const seen=new Set();for(const op of [...log].reverse()){const k=op.c+"/"+op.id;
+      const d=S.db.collection(op.c).doc(op.id);if(op.before)await d.set(op.before);else await d.delete();seen.add(k)}
+    toast("Rückgängig gemacht")}
+  catch(e){toast("Rückgängig ging nicht. Bitte manuell korrigieren.")}}
+function loaded(){return S.loaded.staff&&S.loaded.entries&&S.loaded.closures&&S.loaded.groups&&S.loaded.notes&&S.loaded.ferien}
+async function write(fn,ok){
+  if(!S.db){toast("Speichern ist hier nicht möglich.");return false}
+  const log=[];
+  try{await fn(tracked(S.db,log));setUndo(ok||"Änderung",log);if(ok)toast(ok,log.length>0);return true}
+  catch(e){toast(e&&e.code==="permission_denied"||e&&e.code==="not_granted"?"Keine Berechtigung zum Speichern.":"Speichern fehlgeschlagen. Bitte erneut versuchen.");return false}
+}
+function strip(o){const r={};for(const k in o)if(o[k]!==undefined)r[k]=o[k];return r}
+
+/* ---------- Render ---------- */
+function render(){
+  const nb=$("#notesBadge");nb.hidden=!S.notes.length;nb.textContent=S.notes.length;
+  const tabOf={konten:"uebersicht",schliess:"team"},cur=tabOf[S.view]||S.view;
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.v===cur));
+  $("#fab").hidden=!(S.canWrite&&loaded()&&S.staff.length);
+  const ex=S.staff.some(p=>p.example)||S.entries.some(e=>e.example)||S.closures.some(c=>c.example);
+  $("#banner").innerHTML=ex&&S.canWrite?`<div class="banner"><span>Hier stehen noch <b>Beispieldaten</b>, damit man sieht, wie es aussieht. Trag einfach euer Team ein und entferne die Beispiele.</span><button class="btn" id="rmEx">Beispiele entfernen</button></div>`:"";
+  if($("#rmEx"))$("#rmEx").onclick=removeExamples;
+  const m=$("#main");
+  document.body.classList.toggle("signedout",S.auth!=="in");
+  const ab=$("#acctBtn");ab.hidden=S.auth!=="in";
+  if(S.auth==="in"&&S.user){ab.innerHTML=S.user.photo?`<img src="${esc(S.user.photo)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc((S.user.name||S.user.email||"?").trim().charAt(0).toUpperCase())}</span>`}
+  if(S.auth==="loading"){m.innerHTML=`<div class="status">Wird geladen …</div>`;return}
+  if(S.auth==="out"){renderLogin(m);return}
+  if(S.error==="rules"){m.innerHTML=`<div class="panel status">Die Datenbank lässt den Zugriff noch nicht zu. Bitte die Firestore-Regeln aus der Anleitung (README) eintragen.</div>`;return}
+  if(!loaded()){m.innerHTML=S.error==="timeout"?`<div class="panel status">Die Daten laden gerade nicht. Bitte prüfe die Internetverbindung und öffne die Seite erneut.</div>`:`<div class="status">Daten werden geladen …</div>`;return}
+  const fns={kalender:renderCal,konten:renderKonten,uebersicht:renderOverview,team:renderTeam,schliess:renderClosures,notizen:renderNotes};
+  const subs={uebersicht:[["uebersicht","Personen"],["konten","Tabelle"]],konten:[["uebersicht","Personen"],["konten","Tabelle"]],team:[["team","Team"],["schliess","Schließzeiten & Ferien"]],schliess:[["team","Team"],["schliess","Schließzeiten & Ferien"]]}[S.view];
+  if(subs){m.innerHTML=`<div class="section"><div class="subnav">${segHTML("sub-"+subs[0][0],subs.map(([v,l])=>({v,l,on:v===S.view})),"data-sub")}</div><div id="sub"></div></div>`;
+    m.querySelectorAll("[data-sub]").forEach(b=>b.onclick=()=>setView(b.dataset.sub));fns[S.view]?.($("#sub"))}
+  else fns[S.view]?.(m);
+  afterRender(m);
+}
+
+/* ---------- Übergänge ---------- */
+const reduceMotion=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+let tabReady=false;
+function moveTabInd(){const b=document.querySelector('#tabs button[aria-selected="true"]'),i=$(".tabind");if(!b||!i)return;
+  if(!tabReady)i.classList.add("noanim");
+  i.style.width=b.offsetWidth+"px";i.style.height=b.offsetHeight+"px";i.style.transform=`translate(${b.offsetLeft}px,${b.offsetTop}px)`;
+  if(!tabReady){i.offsetWidth;requestAnimationFrame(()=>i.classList.remove("noanim"));tabReady=true}}
+addEventListener("resize",()=>{tabReady=false;moveTabInd()});
+const segMem={};
+function animateSegs(root){root.querySelectorAll(".seg2[data-key]").forEach(seg=>{const k=seg.dataset.key,cur=+getComputedStyle(seg).getPropertyValue("--i")||0,prev=segMem[k];segMem[k]=cur;
+  if(prev===undefined||prev===cur||reduceMotion())return;const th=seg.querySelector(".thumb");seg.style.setProperty("--i",prev);th.classList.add("noanim");th.offsetWidth;th.classList.remove("noanim");
+  requestAnimationFrame(()=>seg.style.setProperty("--i",cur))})}
+function afterRender(m){moveTabInd();animateSegs(m);
+  const a=S.anim;S.anim=null;if(!a||reduceMotion())return;
+  const target=(a==="left"||a==="right")&&m.querySelector(".gridwrap,.ovgrid,.tablewrap")&&!m.querySelector("#sub")?m.querySelector(".gridwrap,.ovgrid,.tablewrap"):(m.querySelector("#sub")||m);
+  target.classList.remove("vt-left","vt-right","vt-zoom");target.offsetWidth;target.classList.add("vt-"+a);
+  target.addEventListener("animationend",()=>target.classList.remove("vt-"+a),{once:true})}
+
+function monthNav(){return`<div class="monthnav"><button class="iconbtn" id="prev" aria-label="Vorheriger Monat">‹</button><span class="label">${MONTHS[S.month]} ${S.year}</span><button class="iconbtn" id="next" aria-label="Nächster Monat">›</button><button class="btn ghost" id="today">Heute</button></div>`}
+function bindMonthNav(){
+  $("#prev").onclick=()=>{S.anim="right";S.month--;if(S.month<0){S.month=11;S.year--}render()};
+  $("#next").onclick=()=>{S.anim="left";S.month++;if(S.month>11){S.month=0;S.year++}render()};
+  $("#today").onclick=()=>{const t=now.getFullYear()*12+now.getMonth(),c=S.year*12+S.month;S.anim=t>c?"left":t<c?"right":null;S.year=now.getFullYear();S.month=now.getMonth();render();scrollToday()};
+}
+function scrollToday(){const t=document.querySelector(".dayh.today");const w=$(".gridwrap");if(t&&w)w.scrollLeft=Math.max(0,t.offsetLeft-180)}
+
+function segHTML(key,items,attr){const i=Math.max(0,items.findIndex(x=>x.on));
+  return`<div class="seg2" role="group" aria-label="Ansicht" data-key="${key}" style="--n:${items.length};--i:${i}"><span class="thumb" aria-hidden="true"></span>${items.map(x=>`<button ${attr}="${x.v}" aria-pressed="${!!x.on}">${x.l}</button>`).join("")}</div>`}
+function modeToggle(){return segHTML("cal",[{v:"monat",l:"Monat",on:S.calMode==="monat"},{v:"jahr",l:"Jahr",on:S.calMode==="jahr"}],"data-mode")}
+function bindMode(m){m.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{if(S.calMode===b.dataset.mode)return;S.anim="zoom";S.calMode=b.dataset.mode;render()})}
+function renderCal(m){
+  if(S.calMode==="jahr"&&S.staff.length)return renderYear(m);
+  const y=S.year,mo=S.month,n=new Date(Date.UTC(y,mo+1,0)).getUTCDate();
+  const days=[...Array(n)].map((_,i)=>iso(y,mo,i+1));
+  const idx=entryIndex();
+  const addBtn=S.canWrite?`<button class="btn primary wideonly" id="addE">+ Abwesenheit eintragen</button>`:"";
+  if(!S.staff.length){
+    m.innerHTML=`<div class="section"><div class="toolbar">${monthNav()}</div><div class="panel empty"><strong>Noch niemand im Team</strong><span>Lege zuerst Ärztinnen, Ärzte, MFA und Azubis an. Danach erscheinen sie hier als Zeilen im Kalender.</span>${S.canWrite?`<button class="btn primary" id="goTeam">Team anlegen</button>`:""}</div></div>`;
+    bindMonthNav();if($("#goTeam"))$("#goTeam").onclick=()=>{setView("team");openStaff()};return}
+  const head=days.map(d=>{const w=dow(d),h=holName(d);const f=ferienOn(d),tip=[h,f&&(f.label||"Schulferien")].filter(Boolean).join(" · ");return`<th class="dayh ${w===0||w===6?"we":""} ${h?"hol":""} ${f?"fer":""} ${d===TODAY?"today":""}" ${tip?`title="${esc(tip)}"`:""}><span>${WD[w]}</span><b>${+d.slice(8)}</b></th>`}).join("");
+  let body="";
+  for(const g of groups()){const ps=staffSorted(g.k);if(!ps.length)continue;
+    body+=`<tr class="grp"><th class="name">${g.l}</th><td colspan="${n}"></td></tr>`;
+    for(const p of ps){
+      body+=`<tr><th class="name"><button class="namebtn" data-staff="${p.id}" title="${esc(p.name)}">${esc(p.name)}<small>${nf(account(p,y).rest)} Tage Rest ${y}</small></button></th>`;
+      for(const d of days){const e=idx.get(p.id+"|"+d),c=closureOn(d),w=dow(d),h=holName(d),work=isWork(p,d);
+        const t=TYPES.find(t=>t.k===e?.type);
+        const cls=["cell",w===0||w===6?"we":"",h?"hol":"",!work&&!h&&!(w===0||w===6)?"off":"",e?"e t-"+e.type:"",e&&e.half&&e.from===e.to?"half":"",c&&work?"closed":""].join(" ");
+        const label=e?`${t.l}: ${fmtRange(e.from,e.to)}${e.note?" – "+e.note:""}`:c&&work?`Schließzeit: ${c.label||""}`:h?h:`${p.name}, ${fmt(d)}`;
+        body+=`<td class="${cls}"><button data-p="${p.id}" data-d="${d}" ${e?`data-e="${e.id}"`:""} aria-label="${esc(label)}" title="${esc(label)}">${e&&work?t.a:""}</button></td>`}
+      body+="</tr>"}
+    body+=`<tr class="pres"><th class="name">anwesend${g.min?` <span class="minb">mind. ${g.min}</span>`:""}</th>`+days.map(d=>{const{need,pres,closed:c}=presence(g.k,d,idx);
+      const low=!c&&need>0&&(g.min?pres<g.min:pres===0);
+      return need?`<td class="num ${low?"low":""}" title="${pres} von ${need} da${g.min?`, mindestens ${g.min} nötig`:""}">${c?"–":pres+"/"+need}</td>`:"<td></td>"}).join("")+"</tr>";
+  }
+  const hols=days.filter(holName).map(d=>`<b>${fmt(d,false)}</b> ${esc(holName(d))}`);
+  const cls=S.closures.filter(c=>c.to>=days[0]&&c.from<=days[n-1]).map(c=>`<b>${fmtRange(c.from,c.to)}</b> ${esc(c.label||"Schließzeit")}`);
+  const fers=S.ferien.filter(f=>f.to>=days[0]&&f.from<=days[n-1]).map(f=>`<b>${fmtRange(f.from,f.to)}</b> ${esc(f.label||"Schulferien")}`);
+  m.innerHTML=`<div class="section">
+    <div class="toolbar">${monthNav()}<div class="gtools">${modeToggle()}${addBtn}</div></div>
+    <div class="panel gridwrap"><table class="grid"><thead><tr><th class="name"></th>${head}</tr></thead><tbody>${body}</tbody></table></div>
+    <div class="legend">${TYPES.map(t=>`<span><i style="background:var(--t-${t.k==="fortbildung"?"fort":t.k==="sonstiges"?"sonst":t.k})"></i>${t.l}</span>`).join("")}
+      <span><i style="background:repeating-linear-gradient(45deg,var(--closure) 0 3px,transparent 3px 7px)"></i>Praxis geschlossen</span>
+      <span><i style="background:repeating-linear-gradient(135deg,transparent 0 4px,var(--line) 4px 5px);border:1px solid var(--line)"></i>kein Arbeitstag</span>
+      <span><i style="background:var(--holiday)"></i>Feiertag</span><span><i style="background:var(--ferien)"></i>Schulferien NRW</span><span><i style="background:transparent;border:2px solid var(--warn)"></i>Mindestbesetzung unterschritten</span></div>
+    ${hols.length||cls.length||fers.length?`<div class="holist">${[...hols,...cls,...fers].join(" · ")}</div>`:""}
+    ${S.canWrite?`<div class="holist">Tipp: Auf ein Kästchen tippen, um dort etwas einzutragen oder einen Eintrag zu ändern.</div>`:""}
+  </div>`;
+  bindMonthNav();bindMode(m);
+  if($("#addE"))$("#addE").onclick=()=>openEntry({});
+  m.querySelectorAll("td.cell button").forEach(b=>b.onclick=()=>{if(!S.canWrite)return;
+    if(b.dataset.e)openEntry({entry:S.entries.find(e=>e.id===b.dataset.e)});else openEntry({staffId:b.dataset.p,date:b.dataset.d})});
+  m.querySelectorAll(".namebtn").forEach(b=>b.onclick=()=>{S.open=b.dataset.staff;setView("konten")});
+  scrollToday();
+}
+
+function renderYear(m){
+  const y=S.year,idx=entryIndex(),gs=groups(),flt=S.yearFilter,fp=S.staff.find(p=>p.id===flt);
+  const sel=`<div class="field inline"><label for="y-filter">Zeigen</label><select id="y-filter"><option value="">Alle – Anzahl Abwesende</option>${gs.map(g=>{const ps=staffSorted(g.k);return ps.length?`<optgroup label="${esc(g.l)}">${ps.map(p=>`<option value="${p.id}" ${p.id===flt?"selected":""}>${esc(p.name)}</option>`).join("")}</optgroup>`:""}).join("")}</select></div>`;
+  let rows="";
+  for(let mo=0;mo<12;mo++){const n=new Date(Date.UTC(y,mo+1,0)).getUTCDate();rows+=`<tr><th class="name"><button class="namebtn" data-month="${mo}">${MONTHS[mo]}</button></th>`;
+    for(let dd=1;dd<=31;dd++){if(dd>n){rows+=`<td class="yc none"></td>`;continue}
+      const d=iso(y,mo,dd),w=dow(d),h=holName(d),f=ferienOn(d),c=closureOn(d),we=w===0||w===6;
+      let cls=["yc",we?"we":"",h?"hol":"",f?"fer":"",d===TODAY?"today":""],txt="",tip=[`${WD[w]}, ${fmt(d)}`,h,f&&(f.label||"Schulferien"),c&&("Geschlossen: "+(c.label||""))].filter(Boolean);
+      if(fp){const e=idx.get(fp.id+"|"+d);if(e&&isWork(fp,d)){const t=TYPES.find(t=>t.k===e.type);cls.push("t-"+e.type,"e");txt=t.a;tip.push(t.l+(e.note?": "+e.note:""))}
+        else if(c&&isWork(fp,d)){cls.push("closed")}}
+      else if(!we&&!h){let away=0;const names=[];for(const p of S.staff){const e=idx.get(p.id+"|"+d);if(e&&isWork(p,d)){away++;names.push(p.name)}}
+        if(c)cls.push("closed");else if(away){cls.push("lv"+Math.min(away,4));txt=away;tip.push("Abwesend: "+names.join(", "))}
+        const low=gs.filter(g=>understaffed(g,d,idx));if(low.length){cls.push("low");tip.push("Zu wenig: "+low.map(g=>g.l).join(", "))}}
+      rows+=`<td class="${cls.join(" ")}" title="${esc(tip.join(" · "))}"><button data-day="${d}" aria-label="${esc(tip.join(" · "))}">${txt}</button></td>`}
+    rows+="</tr>"}
+  m.innerHTML=`<div class="section">
+    <div class="toolbar"><div class="monthnav"><button class="iconbtn" id="py" aria-label="Vorheriges Jahr">‹</button><span class="label">${y}</span><button class="iconbtn" id="ny" aria-label="Nächstes Jahr">›</button></div>
+      <div class="gtools">${sel}${modeToggle()}</div></div>
+    <div class="panel gridwrap"><table class="grid year"><thead><tr><th class="name"></th>${[...Array(31)].map((_,i)=>`<th class="dayh"><b>${i+1}</b></th>`).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="legend">${fp?TYPES.map(t=>`<span><i class="pill t-${t.k}" style="padding:0"></i>${t.l}</span>`).join(""):`<span><i class="lv1"></i>1 abwesend</span><span><i class="lv2"></i>2</span><span><i class="lv3"></i>3</span><span><i class="lv4"></i>4+</span>`}
+      <span><i style="background:var(--holiday)"></i>Feiertag</span><span><i style="background:var(--ferien)"></i>Schulferien NRW</span>
+      <span><i style="background:repeating-linear-gradient(45deg,var(--closure) 0 3px,transparent 3px 7px)"></i>Praxis geschlossen</span>
+      ${fp?"":`<span><i style="background:transparent;border:2px solid var(--warn)"></i>Mindestbesetzung unterschritten</span>`}</div>
+    <div class="holist">Auf einen Monat oder Tag tippen, um ihn in der Monatsansicht zu öffnen.</div></div>`;
+  $("#py").onclick=()=>{S.anim="right";S.year--;render()};$("#ny").onclick=()=>{S.anim="left";S.year++;render()};bindMode(m);
+  $("#y-filter").onchange=e=>{S.yearFilter=e.target.value;render()};
+  m.querySelectorAll("[data-month]").forEach(b=>b.onclick=()=>{S.anim="zoom";S.month=+b.dataset.month;S.calMode="monat";render()});
+  m.querySelectorAll("[data-day]").forEach(b=>b.onclick=()=>{S.anim="zoom";S.month=+b.dataset.day.slice(5,7)-1;S.calMode="monat";render()});
+}
+
+function renderOverview(m){
+  const y=S.year,ys=y+"-01-01",ye=y+"-12-31",gs=groups();
+  const clip=(a,b)=>[a>ys?a:ys,b<ye?b:ye];
+  const sel=`<div class="field inline"><label for="ov-p">Person</label><select id="ov-p"><option value="">Alle Personen</option>${gs.map(g=>{const ps=staffSorted(g.k);return ps.length?`<optgroup label="${esc(g.l)}">${ps.map(p=>`<option value="${p.id}" ${p.id===S.ovPerson?"selected":""}>${esc(p.name)}</option>`).join("")}</optgroup>`:""}).join("")}</select></div>`;
+  const card=(p,g)=>{const a=account(p,y);
+    const es=S.entries.filter(e=>e.staffId===p.id&&e.to>=ys&&e.from<=ye).sort((x,z)=>x.from.localeCompare(z.from));
+    const sections=TYPES.map(t=>{let rows=es.filter(e=>e.type===t.k).map(e=>{const[ca,cb]=clip(e.from,e.to);return{e,from:e.from,to:e.to,n:countWork(p,ca,cb,e.half),note:e.note||"",half:e.half&&e.from===e.to}});
+      if(t.k==="urlaub")rows=rows.concat(S.closures.filter(c=>c.deduct&&c.to>=ys&&c.from<=ye).map(c=>{const[ca,cb]=clip(c.from,c.to);let n=0;
+        eachDay(ca,cb,d=>{if(isWork(p,d)&&!es.some(e=>e.type==="urlaub"&&e.from<=d&&d<=e.to))n++});return{closure:c,from:c.from,to:c.to,n,note:"Betriebsurlaub"+(c.label?": "+c.label:"")}}).filter(r=>r.n>0)).sort((x,z)=>x.from.localeCompare(z.from));
+      if(!rows.length)return"";const sum=rows.reduce((s,r)=>s+r.n,0);
+      return`<div class="ovsec"><div class="ovhead"><span class="pill t-${t.k}">${t.l}</span><span class="num">${nf(sum)} Tag${sum===1?"":"e"}</span></div>
+        <ul class="ovlist">${rows.map(r=>`<li class="${r.to<TODAY?"":"future"}">${S.canWrite&&r.e?`<button class="ovrow" data-e="${r.e.id}">`:`<div class="ovrow">`}
+          <span class="num ovdate">${fmtRange(r.from,r.to)}${r.half?" · ½":""}</span><span class="num ovn">${nf(r.n)}</span>
+          ${r.note?`<span class="ovnote">${esc(r.note)}</span>`:""}${r.from>TODAY?`<span class="chip">geplant</span>`:""}${S.canWrite&&r.e?"</button>":"</div>"}</li>`).join("")}</ul></div>`}).join("");
+    return`<article class="panel ovcard"><header><div><h2>${esc(p.name)}</h2><div class="meta">${esc(g.l)} · ${workdaysOf(p).map(d=>WD[d]).join(", ")}</div></div>
+      <div class="ovrest ${a.rest<0?"neg":""}"><b class="num">${nf(a.rest)}</b><span>Tage Rest</span></div></header>
+      <dl class="ovstats"><div><dt>Anspruch</dt><dd class="num">${nf(a.total)}${a.carry?` <small>(inkl. ${nf(a.carry)} Übertrag)</small>`:""}</dd></div>
+        <div><dt>Genommen</dt><dd class="num">${nf(a.taken)}</dd></div><div><dt>Geplant</dt><dd class="num">${nf(a.planned)}</dd></div>
+        <div><dt>Abwesend</dt><dd class="num">${nf(a.krank)}</dd></div><div><dt>Fortbildung</dt><dd class="num">${nf(a.fort)}</dd></div></dl>
+      ${sections||`<div class="holist">Keine Einträge in ${y}.</div>`}</article>`};
+  let cards="";for(const g of gs)for(const p of staffSorted(g.k)){if(S.ovPerson&&p.id!==S.ovPerson)continue;cards+=card(p,g)}
+  m.innerHTML=`<div class="section">
+    <div class="toolbar"><div class="monthnav"><button class="iconbtn" id="py" aria-label="Vorheriges Jahr">‹</button><span class="label">${y}</span><button class="iconbtn" id="ny" aria-label="Nächstes Jahr">›</button></div>${S.staff.length?sel:""}</div>
+    ${S.staff.length?`<div class="ovgrid">${cards}</div><div class="holist">Gezählt werden Arbeitstage im Jahr ${y}. Einträge über den Jahreswechsel zählen nur mit den Tagen in ${y}.${S.canWrite?" Auf einen Eintrag tippen, um ihn zu ändern.":""}</div>`
+    :`<div class="panel empty"><strong>Noch niemand im Team</strong><span>Sobald Personen angelegt sind, steht hier für jede Person, wann sie Urlaub hatte, abwesend oder auf Fortbildung war.</span></div>`}</div>`;
+  $("#py").onclick=()=>{S.anim="right";S.year--;render()};$("#ny").onclick=()=>{S.anim="left";S.year++;render()};
+  if($("#ov-p"))$("#ov-p").onchange=e=>{S.ovPerson=e.target.value;render()};
+  m.querySelectorAll("button.ovrow").forEach(b=>b.onclick=()=>openEntry({entry:S.entries.find(e=>e.id===b.dataset.e)}));
+}
+
+function renderKonten(m){
+  const y=S.year;
+  let rows="";
+  for(const g of groups()){const ps=staffSorted(g.k);if(!ps.length)continue;
+    rows+=`<tr class="sub"><td colspan="8">${g.l}</td></tr>`;
+    for(const p of ps){const a=account(p,y),tot=Math.max(a.total,a.taken+a.planned,1);
+      rows+=`<tr class="click" data-id="${p.id}"><td><b>${esc(p.name)}</b></td>
+        <td class="r num">${nf(a.base)}${a.carry?` <span style="color:var(--muted)">+${nf(a.carry)}</span>`:""}</td>
+        <td class="r num">${nf(a.taken)}</td><td class="r num">${nf(a.planned)}</td>
+        <td class="r num rest ${a.rest<0?"neg":""}">${nf(a.rest)}</td>
+        <td><div class="bar" title="genommen / geplant / offen"><span style="width:${a.taken/tot*100}%;background:var(--t-urlaub)"></span><span style="width:${a.planned/tot*100}%;background:var(--t-urlaub);opacity:.45"></span></div></td>
+        <td class="r num">${nf(a.krank)}</td><td class="r num">${nf(a.fort)}</td></tr>`;
+      if(S.open===p.id){const es=S.entries.filter(e=>e.staffId===p.id&&e.to>=y+"-01-01"&&e.from<=y+"-12-31").sort((a,b)=>a.from.localeCompare(b.from));
+        rows+=`<tr class="detail"><td colspan="8"><div class="elist">${es.length?es.map(e=>{const t=TYPES.find(t=>t.k===e.type);
+          return`<div class="erow"><span class="pill t-${e.type}">${t.l}</span><span class="num">${fmtRange(e.from,e.to)}${e.half&&e.from===e.to?" (halber Tag)":""}</span><span style="color:var(--muted)">${nf(countWork(p,e.from,e.to,e.half))} Arbeitstage${e.note?" · "+esc(e.note):""}</span>${S.canWrite?`<button data-e="${e.id}">Bearbeiten</button>`:""}</div>`}).join(""):`<span style="color:var(--muted)">Keine Einträge in ${y}.</span>`}
+          ${S.canWrite?`<div><button class="btn" data-new="${p.id}">+ Eintrag für ${esc(p.name)}</button></div>`:""}</div></td></tr>`}
+    }}
+  m.innerHTML=`<div class="section">
+    <div class="toolbar"><div class="monthnav"><button class="iconbtn" id="py" aria-label="Vorheriges Jahr">‹</button><span class="label">${y}</span><button class="iconbtn" id="ny" aria-label="Nächstes Jahr">›</button></div>
+      <button class="btn" id="xls">Als Excel sichern</button></div>
+    <div class="holist">Gezählt werden nur Arbeitstage (ohne Wochenende und NRW-Feiertage). Stand: ${fmt(TODAY)}</div>
+    ${S.staff.length?`<div class="panel tablewrap"><table class="list"><thead><tr><th>Name</th><th class="r">Anspruch</th><th class="r">Genommen</th><th class="r">Geplant</th><th class="r">Rest</th><th></th><th class="r">Abwesend</th><th class="r">Fortb.</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="holist">Auf eine Zeile tippen, um alle Einträge der Person zu sehen. Betriebsurlaub mit „vom Urlaub abziehen“ zählt automatisch mit.</div>`
+    :`<div class="panel empty"><strong>Noch keine Urlaubskonten</strong><span>Sobald das Team angelegt ist, siehst du hier für jede Person Anspruch, genommene und geplante Tage und den Resturlaub.</span></div>`}
+  </div>`;
+  $("#py").onclick=()=>{S.anim="right";S.year--;render()};$("#ny").onclick=()=>{S.anim="left";S.year++;render()};
+  $("#xls").onclick=e=>exportExcel(e.currentTarget);
+  m.querySelectorAll("tr.click").forEach(r=>r.onclick=()=>{S.open=S.open===r.dataset.id?null:r.dataset.id;render()});
+  m.querySelectorAll(".erow button").forEach(b=>b.onclick=()=>openEntry({entry:S.entries.find(e=>e.id===b.dataset.e)}));
+  m.querySelectorAll("[data-new]").forEach(b=>b.onclick=()=>openEntry({staffId:b.dataset.new}));
+}
+
+function wdBadge(p){const w=workdaysOf(p);return`<span class="wd">${[1,2,3,4,5,6].map(d=>`<span class="${w.includes(d)?"on":""}">${WD[d]}</span>`).join("")}</span>`}
+function renderTeam(m){
+  const gs=groups();let html="";
+  gs.forEach((g,i)=>{const ps=staffSorted(g.k);const real=gs.filter(x=>!x.none);const ri=real.indexOf(g);
+    html+=`<div class="section"><div class="ghead"><h3>${esc(g.l)} · ${ps.length}${g.min?` · mind. ${g.min} da`:""}</h3>${S.canWrite&&!g.none?`<div class="gtools">
+      <button class="iconbtn sm" data-up="${g.k}" ${ri<=0?"disabled":""} aria-label="Team nach oben">↑</button>
+      <button class="iconbtn sm" data-down="${g.k}" ${ri>=real.length-1?"disabled":""} aria-label="Team nach unten">↓</button>
+      <button class="btn sm" data-g="${g.k}">Bearbeiten</button></div>`:""}</div>
+      ${ps.length?`<div class="cards">${ps.map(p=>`<div class="card"><div><b>${esc(p.name)}</b>
+      <div class="meta">${nf(Number(p.days)||0)} Urlaubstage/Jahr</div><div style="margin-top:6px">${wdBadge(p)}</div></div>
+      ${S.canWrite?`<button class="btn" data-id="${p.id}">Ändern</button>`:""}</div>`).join("")}</div>`:`<div class="holist">Noch niemand in diesem Team.</div>`}</div>`});
+  m.innerHTML=`<div class="section"><div class="toolbar"><h2>Team</h2>${S.canWrite?`<div class="gtools"><button class="btn" id="addG">+ Team hinzufügen</button><button class="btn primary" id="addS">+ Person hinzufügen</button></div>`:""}</div>${html}</div>`;
+  if($("#addS"))$("#addS").onclick=()=>openStaff();
+  if($("#addG"))$("#addG").onclick=()=>openGroup();
+  m.querySelectorAll(".card button").forEach(b=>b.onclick=()=>openStaff(S.staff.find(p=>p.id===b.dataset.id)));
+  m.querySelectorAll("[data-g]").forEach(b=>b.onclick=()=>openGroup(gs.find(g=>g.k===b.dataset.g)));
+  m.querySelectorAll("[data-up],[data-down]").forEach(b=>b.onclick=()=>moveGroup(b.dataset.up||b.dataset.down,b.dataset.up?-1:1));
+}
+
+/* Teams: beim ersten Ändern werden die Standard-Teams gespeichert */
+async function ensureGroups(db){
+  if(S.groups.length)return;
+  for(const [i,g] of DEFAULT_GROUPS.entries())await db.collection("groups").doc(g.k).set({label:g.l,order:i});
+}
+async function moveGroup(k,dir){
+  const real=groups().filter(g=>!g.none);const i=real.findIndex(g=>g.k===k),j=i+dir;if(i<0||j<0||j>=real.length)return;
+  await write(async db=>{await ensureGroups(db);
+    const order=real.map(g=>g.k);[order[i],order[j]]=[order[j],order[i]];
+    for(const [n,key] of order.entries()){const cur=S.groups.find(x=>x.id===key);if(!cur||cur.order!==n)await db.collection("groups").doc(key).update({order:n})}
+  });
+}
+function openGroup(g){
+  const real=groups().filter(x=>!x.none);const members=g?staffSorted(g.k):[];const others=real.filter(x=>!g||x.k!==g.k);
+  modal(`<h2>${g?"Team bearbeiten":"Team hinzufügen"}</h2>
+    <div class="field"><label for="g-name">Name des Teams</label><input id="g-name" value="${esc(g?.l||"")}" placeholder="z. B. Anmeldung, Labor, Reinigung" maxlength="40"></div>
+    <div class="field"><label for="g-min">Mindestbesetzung</label><input id="g-min" type="number" inputmode="numeric" min="0" max="50" step="1" value="${g?.min||0}"></div>
+    <div class="hint">So viele Personen aus diesem Team müssen an jedem Arbeitstag mindestens da sein. Wird es weniger, färbt sich der Tag im Kalender rot und beim Eintragen erscheint eine Warnung. 0 = keine Vorgabe.</div>
+    <div class="cbox"></div>
+    <div class="actions">${g?`<button class="btn danger" id="del">Team löschen</button>`:""}<div class="right"><button class="btn" id="cancel">Abbrechen</button><button class="btn primary" id="save">Speichern</button></div></div>`,
+  d=>{
+    d.querySelector("#cancel").onclick=close;
+    d.querySelector("#save").onclick=async()=>{const label=d.querySelector("#g-name").value.trim();if(!label){toast("Bitte einen Namen eingeben.");return}
+      d.querySelector("#save").disabled=true;
+      const ok=await write(async db=>{await ensureGroups(db);const min=Math.max(0,Math.round(Number(d.querySelector("#g-min").value)||0));
+        if(g)await db.collection("groups").doc(g.k).update({label,min});
+        else await db.collection("groups").add({label,order:real.length,min});
+      },"Gespeichert");
+      if(ok)close();else d.querySelector("#save").disabled=false};
+    if(g)d.querySelector("#del").onclick=()=>{
+      if(members.length&&!others.length){toast("Das letzte Team mit Personen kann nicht gelöscht werden.");return}
+      const box=d.querySelector(".cbox");
+      box.innerHTML=`<div class="confirm"><span>Team „${esc(g.l)}“ löschen?${members.length?` Die ${members.length} Person${members.length===1?"":"en"} darin werden mit allen Einträgen behalten und in ein anderes Team verschoben.`:""}</span>
+        ${members.length?`<div class="field"><label for="g-move">Personen verschieben nach</label><select id="g-move">${others.map(o=>`<option value="${o.k}">${esc(o.l)}</option>`).join("")}</select></div>`:""}
+        <div class="actions"><button class="btn ghost" data-x>Abbrechen</button><button class="btn danger" data-y>Team löschen</button></div></div>`;
+      box.querySelector("[data-x]").onclick=()=>box.innerHTML="";
+      box.querySelector("[data-y]").onclick=async()=>{const target=box.querySelector("#g-move")?.value;
+        const ok=await write(async db=>{await ensureGroups(db);
+          for(const p of members)await db.collection("staff").doc(p.id).update({group:target});
+          await db.collection("groups").doc(g.k).delete()},"Team gelöscht");
+        if(ok)close()};
+    };
+  })
+}
+
+function renderClosures(m){
+  const cs=[...S.closures].sort((a,b)=>b.from.localeCompare(a.from));
+  const fs=[...S.ferien].sort((a,b)=>a.from.localeCompare(b.from));
+  m.innerHTML=`<div class="section"><div class="toolbar"><h2>Schließzeiten & Betriebsurlaub</h2>${S.canWrite?`<button class="btn primary" id="addC">+ Schließzeit</button>`:""}</div>
+    ${cs.length?`<div class="cards">${cs.map(c=>`<div class="card"><div><b>${esc(c.label||"Schließzeit")}</b><div class="meta num">${fmtRange(c.from,c.to)}</div>
+      <div class="meta">${c.deduct?"wird vom Urlaub abgezogen":"zählt nicht als Urlaub"}</div></div>${S.canWrite?`<button class="btn" data-id="${c.id}">Ändern</button>`:""}</div>`).join("")}</div>`
+    :`<div class="panel empty"><strong>Keine Schließzeiten eingetragen</strong><span>Zum Beispiel Betriebsurlaub im Sommer oder „zwischen den Jahren“. Sie erscheinen im Kalender schraffiert und können automatisch vom Urlaub abgezogen werden.</span></div>`}
+    <div class="toolbar" style="margin-top:12px"><h2>Schulferien NRW</h2>${S.canWrite?`<button class="btn" id="addF">+ Ferien</button>`:""}</div>
+    ${fs.length?`<div class="cards">${fs.map(f=>`<div class="card ${f.to<TODAY?"past":""}"><div><b>${esc(f.label||"Schulferien")}</b><div class="meta num">${fmtRange(f.from,f.to)}</div></div>${S.canWrite?`<button class="btn" data-f="${f.id}">Ändern</button>`:""}</div>`).join("")}</div>`
+    :`<div class="panel empty"><strong>Keine Schulferien eingetragen</strong><span>Ferien erscheinen im Kalender als farbiger Streifen. Sie zählen nicht als Urlaub, sondern helfen nur bei der Planung.</span></div>`}
+    <div class="holist">Die Ferientermine bitte einmal mit der Ferienordnung des Schulministeriums NRW vergleichen und hier bei Bedarf anpassen.</div>
+    <div class="holist">Gesetzliche Feiertage in NRW sind schon eingerechnet: ${Object.entries(holidays(S.year)).sort().map(([d,n])=>`${fmt(d,false)} ${n}`).join(" · ")}</div></div>`;
+  if($("#addC"))$("#addC").onclick=()=>openClosure();
+  if($("#addF"))$("#addF").onclick=()=>openFerien();
+  m.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>openFerien(S.ferien.find(f=>f.id===b.dataset.f)));
+  m.querySelectorAll(".card button[data-id]").forEach(b=>b.onclick=()=>openClosure(S.closures.find(c=>c.id===b.dataset.id)));
+}
+
+function renderNotes(m){
+  const ns=[...S.notes].sort((a,b)=>(b.created||"").localeCompare(a.created||""));
+  m.innerHTML=`<div class="section"><div class="toolbar"><h2>Notizen</h2></div>
+    ${S.canWrite?`<div class="panel noteform"><div class="field"><label for="n-text">Spontane Anfrage kurz aufschreiben</label>
+      <textarea id="n-text" rows="3" maxlength="500" placeholder="z. B. Anna fragt nach Urlaub 2.–6. März"></textarea></div>
+      <div class="actions"><span class="holist">Später mit „Eintragen“ in den Kalender übernehmen.</span><button class="btn primary" id="n-add">Notieren</button></div></div>`:""}
+    ${ns.length?`<div class="notes">${ns.map(n=>`<div class="card note"><div><div class="ntext">${esc(n.text)}</div><div class="meta num">${n.created?fmtStamp(n.created):""}</div></div>
+      ${S.canWrite?`<div class="gtools"><button class="btn sm primary" data-in="${n.id}">Eintragen</button><button class="btn sm" data-rm="${n.id}">Löschen</button></div>`:""}</div>`).join("")}</div>`
+    :`<div class="panel empty"><strong>Keine offenen Notizen</strong><span>Hier landen kurze Anfragen, zum Beispiel am Telefon oder an der Anmeldung, bis sie richtig eingetragen sind.</span></div>`}</div>`;
+  const ta=$("#n-text"),add=$("#n-add");
+  if(add){const go=async()=>{const t=ta.value.trim();if(!t){ta.focus();return}add.disabled=true;
+      if(await write(db=>db.collection("notes").add({text:t,created:new Date().toISOString()}),"Notiz gespeichert"))ta.value="";add.disabled=false};
+    add.onclick=go;ta.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();go()}})}
+  m.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>write(db=>db.collection("notes").doc(b.dataset.rm).delete(),"Notiz gelöscht"));
+  m.querySelectorAll("[data-in]").forEach(b=>b.onclick=()=>{const n=S.notes.find(x=>x.id===b.dataset.in);openEntry({noteText:n.text.slice(0,300),noteId:n.id})});
+}
+function fmtStamp(t){const d=new Date(t);return isNaN(d)?"":d.toLocaleDateString("de-DE",{weekday:"short",day:"2-digit",month:"2-digit",year:"numeric"})+", "+d.toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr"}
+
+const TAB_ORDER=["kalender","uebersicht","konten","notizen","team","schliess"];
+function setView(v){if(v===S.view){render();return}const a=TAB_ORDER.indexOf(S.view),b=TAB_ORDER.indexOf(v);S.anim=b>a?"left":"right";S.view=v;try{localStorage.setItem("up.view",v)}catch(e){}render()}
+document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
+$("#fab").onclick=()=>openEntry({});
+$("#undoBtn").onclick=()=>{hideToast();doUndo()};
+
+/* ---------- Datumsfeld: selbst tippen oder Kalender ---------- */
+function parseDE(str,yr){str=String(str||"").trim();if(!str)return"";
+  if(/^\d{4}-\d{2}-\d{2}$/.test(str))return str;
+  let d,m,y;let r=str.match(/^(\d{1,2})\s*[.\/\-, ]\s*(\d{1,2})\s*(?:[.\/\-, ]\s*(\d{2,4})?)?\.?$/);
+  if(r){d=+r[1];m=+r[2];y=r[3]}
+  else if(/^\d{4}(\d{2}|\d{4})?$/.test(str)){d=+str.slice(0,2);m=+str.slice(2,4);y=str.slice(4)||undefined}
+  else return null;
+  y=y===undefined?(yr||+TODAY.slice(0,4)):(String(y).length===2?2000+ +y:+y);
+  if(y<1900||y>2200||m<1||m>12||d<1||d>31)return null;
+  const out=iso(y,m-1,d);return +out.slice(8)===d?out:null}
+function dateField(id,label,val,next){const[y,m,d]=(val||"").split("-");
+  return`<div class="field"><label for="${id}-d">${label}</label><div class="datein seg" id="${id}" ${next?`data-next="${next}"`:""}>
+  <input id="${id}-d" class="dd" type="text" inputmode="numeric" maxlength="2" placeholder="TT" aria-label="${label}: Tag" value="${d||""}"><span class="dot">.</span>
+  <input id="${id}-m" class="mm" type="text" inputmode="numeric" maxlength="2" placeholder="MM" aria-label="${label}: Monat" value="${m||""}"><span class="dot">.</span>
+  <input id="${id}-y" class="yy" type="text" inputmode="numeric" maxlength="4" placeholder="JJJJ" aria-label="${label}: Jahr" value="${y||""}">
+  <span class="pick" title="Im Kalender auswählen" aria-hidden="true">📅<input type="date" id="${id}-pick" tabindex="-1" value="${val||""}"></span></div></div>`}
+function selectAll(el){const f=()=>{if(document.activeElement!==el)return;try{el.setSelectionRange(0,el.value.length)}catch(e){el.select()}};f();const v=el.value;setTimeout(()=>{if(el.value===v)f()},0)}
+function bindDate(root,id){
+  const box=root.querySelector("#"+id),D=box.querySelector(".dd"),M=box.querySelector(".mm"),Y=box.querySelector(".yy"),pk=box.querySelector("input[type=date]");
+  const segs=[D,M,Y],commits=[];
+  const nextField=()=>{const n=box.dataset.next&&root.querySelector("#"+box.dataset.next+"-d");if(n){n.focus();selectAll(n)}};
+  const read=()=>{const d=+D.value,m=+M.value;let y=Y.value;if(!D.value||!M.value||!y)return"";
+    y=y.length<=2?2000+ +y:+y;if(y<1900||y>2200||m<1||m>12||d<1||d>31)return null;const o=iso(y,m-1,d);return +o.slice(8)===d?o:null};
+  let cur=read()||"";
+  const refresh=()=>{const v=read();cur=v||"";box.classList.toggle("bad",v===null);if(v)pk.value=v};
+  const commit=()=>{refresh();commits.forEach(f=>f())};
+  const go=i=>{if(i<segs.length){segs[i].focus();selectAll(segs[i])}else{Y.blur();commit();nextField()}};
+  segs.forEach((el,i)=>{
+    el.addEventListener("focus",()=>selectAll(el));
+    el.addEventListener("click",()=>selectAll(el));
+    el.addEventListener("input",()=>{const clean=el.value.replace(/\D/g,"");if(clean!==el.value)el.value=clean;
+      if(el===D&&clean.length===2&&+clean>31){D.value="0"+clean[0];M.value=clean[1];refresh();if(+clean[1]>1)go(2);else{M.focus();M.setSelectionRange(1,1)}return}
+      refresh();
+      if(el===D&&(clean.length===2||(clean.length===1&&+clean>3)))go(1);
+      else if(el===M&&(clean.length===2||(clean.length===1&&+clean>1)))go(2);
+      else if(el===Y&&clean.length===4)go(3)});
+    el.addEventListener("keydown",e=>{
+      if([".",",","/","-"," "].includes(e.key)){e.preventDefault();if(el.value)go(i+1)}
+      else if(e.key==="Backspace"&&!el.value&&i>0){e.preventDefault();segs[i-1].focus();selectAll(segs[i-1])}
+      else if(e.key==="Enter"){e.preventDefault();go(i+1)}});
+    el.addEventListener("blur",()=>{if(el!==Y&&el.value.length===1)el.value="0"+el.value;
+      if(el===Y&&el.value.length===2)el.value="20"+el.value;
+      setTimeout(()=>{if(!box.contains(document.activeElement))commit()},0)});
+  });
+  pk.addEventListener("change",()=>{if(!pk.value)return;const[y,m,d]=pk.value.split("-");D.value=d;M.value=m;Y.value=y;commit()});
+  return{get value(){return cur},
+    set value(v){const[y,m,d]=(v||"").split("-");D.value=d||"";M.value=m||"";Y.value=y||"";pk.value=v||"";refresh();box.dispatchEvent(new Event("input",{bubbles:true}))},
+    addEventListener:(ev,fn)=>box.addEventListener(ev,fn),onCommit:fn=>commits.push(fn)}}
+
+/* ---------- Dialoge ---------- */
+function modal(html,mount){const el=$("#modal");el.innerHTML=`<div class="overlay"><div class="dialog glass" role="dialog" aria-modal="true">${html}</div></div>`;
+  const ov=el.firstChild;ov.onclick=e=>{if(e.target===ov)close()};mount(ov.firstChild);const f=ov.querySelector("input,select");if(f&&matchMedia("(min-width:640px)").matches)f.focus()}
+function close(){const host=$("#modal"),ov=host.firstElementChild;if(!ov)return;
+  if(reduceMotion()){host.innerHTML="";return}
+  ov.classList.add("closing");setTimeout(()=>{if(host.firstElementChild===ov)host.innerHTML=""},300)}
+document.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
+function confirmBox(d,text,label,fn){const box=d.querySelector(".cbox");box.innerHTML=`<div class="confirm"><span>${text}</span><div class="actions"><button class="btn ghost" data-x>Abbrechen</button><button class="btn danger" data-y>${label}</button></div></div>`;
+  box.querySelector("[data-x]").onclick=()=>box.innerHTML="";box.querySelector("[data-y]").onclick=fn}
+
+function openEntry({entry,staffId,date,noteText,noteId}){
+  if(!S.staff.length){toast("Bitte zuerst das Team anlegen.");setView("team");return}
+  const e=entry||{staffId:staffId||S.staff[0].id,type:"urlaub",from:date||TODAY,to:date||TODAY,half:false,note:noteText||""};
+  const opts=groups().map(g=>{const ps=staffSorted(g.k);return ps.length?`<optgroup label="${g.l}">${ps.map(p=>`<option value="${p.id}" ${p.id===e.staffId?"selected":""}>${esc(p.name)}</option>`).join("")}</optgroup>`:""}).join("");
+  modal(`<h2>${entry?"Eintrag ändern":"Abwesenheit eintragen"}</h2>
+    <div class="field"><label for="f-staff">Wer?</label><select id="f-staff">${opts}</select></div>
+    <div class="field"><label for="f-type">Art</label><select id="f-type">${TYPES.map(t=>`<option value="${t.k}" ${t.k===e.type?"selected":""}>${t.l}</option>`).join("")}</select></div>
+    <div class="row2">${dateField("f-from","Von",e.from,"f-to")}${dateField("f-to","Bis",e.to)}</div>
+    <label class="check" id="halfwrap"><input type="checkbox" id="f-half" ${e.half?"checked":""}> Nur halber Tag</label>
+    <div class="field"><label for="f-note">Notiz (optional)</label><input id="f-note" value="${esc(e.note||"")}" placeholder="z. B. genehmigt am 3.11." maxlength="300"></div>
+    <div class="hint" id="calc"></div>
+    <div class="cbox"></div>
+    <div class="actions">${entry?`<button class="btn danger" id="del">Löschen</button>`:""}<div class="right"><button class="btn" id="cancel">Abbrechen</button><button class="btn primary" id="save">Speichern</button></div></div>`,
+  d=>{
+    const f={staff:d.querySelector("#f-staff"),type:d.querySelector("#f-type"),from:bindDate(d,"f-from"),to:bindDate(d,"f-to"),half:d.querySelector("#f-half"),note:d.querySelector("#f-note")};
+    f.from.onCommit(()=>{const a=f.from.value,b=f.to.value;if(a&&(!b||b<a))f.to.value=a;upd()});
+    const upd=()=>{const p=S.staff.find(p=>p.id===f.staff.value);const a=f.from.value,b=f.to.value;
+      d.querySelector("#halfwrap").hidden=a!==b;
+      const calc=d.querySelector("#calc");if(!p||!a){calc.textContent="";return}
+      const n=countWork(p,a,b,f.half.checked&&a===b);
+      const clash=S.entries.filter(x=>x.staffId===p.id&&x.id!==entry?.id&&x.from<=b&&x.to>=a);
+      const g=groupOf(p),short=[];if(g&&g.min){const idx=entryIndex();eachDay(a,b,dd=>{if(!isWork(p,dd))return;const r=presence(g.k,dd,idx,entry?.id,p.id);if(!r.closed&&r.pres<g.min)short.push(dd)})}
+      const y=+a.slice(0,4),acc=account(p,y);
+      let t=`${nf(n)} Arbeitstag${n===1?"":"e"} für ${esc(p.name)}`;
+      if(f.type.value==="urlaub"){const old=entry&&entry.type==="urlaub"&&entry.staffId===p.id?countWork(p,entry.from,entry.to,entry.half):0;t+=` · danach noch ${nf(acc.rest-n+old)} Tage Resturlaub ${y}`}
+      calc.className="hint"+(clash.length||short.length?" warn":"");
+      calc.innerHTML=t+(clash.length?`<br>Achtung: überschneidet sich mit ${clash.map(x=>TYPES.find(t=>t.k===x.type).l+" "+fmtRange(x.from,x.to)).join(", ")}.`:"")+(short.length?`<br>Achtung: Mindestbesetzung ${esc(g.l)} (${g.min}) wäre unterschritten am ${short.slice(0,6).map(x=>fmt(x,false)).join(", ")}${short.length>6?` und ${short.length-6} weiteren Tagen`:""}`:"")};
+    Object.values(f).forEach(i=>i.addEventListener("input",upd));Object.values(f).forEach(i=>i.addEventListener("change",upd));upd();
+    d.querySelector("#cancel").onclick=close;
+    d.querySelector("#save").onclick=async()=>{const a=f.from.value,b=f.to.value;if(!a||!b){toast("Bitte ein gültiges Datum eingeben, z. B. 23.11.2026.");return}
+      if(b<a){toast("„Bis“ liegt vor „Von“. Bitte prüfen.");return}
+      const data=strip({staffId:f.staff.value,type:f.type.value,from:a,to:b<a?a:b,half:a===b&&f.half.checked,note:f.note.value.trim(),example:entry?.example||undefined});
+      d.querySelector("#save").disabled=true;
+      if(await write(async db=>{if(entry)await db.collection("entries").doc(entry.id).set(data);else await db.collection("entries").add(data);if(noteId)await db.collection("notes").doc(noteId).delete()},noteId?"Eingetragen, Notiz erledigt":"Gespeichert"))close();else d.querySelector("#save").disabled=false};
+    if(entry)d.querySelector("#del").onclick=()=>confirmBox(d,"Diesen Eintrag wirklich löschen?","Löschen",async()=>{if(await write(db=>db.collection("entries").doc(entry.id).delete(),"Gelöscht"))close()});
+  })
+}
+
+function openStaff(p){
+  const y=S.year;const w=p?workdaysOf(p):[1,2,3,4,5];
+  modal(`<h2>${p?"Person ändern":"Person hinzufügen"}</h2>
+    <div class="field"><label for="s-name">Name</label><input id="s-name" value="${esc(p?.name||"")}" placeholder="z. B. Dr. Müller oder Sabine" maxlength="60"></div>
+    <div class="field"><label for="s-group">Team</label><select id="s-group">${groups().filter(g=>!g.none).map((g,i)=>`<option value="${g.k}" ${(p?p.group===g.k:i===0)?"selected":""}>${esc(g.l)}</option>`).join("")}</select></div>
+    <div class="row2"><div class="field"><label for="s-days">Urlaubstage pro Jahr</label><input id="s-days" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="${p?.days??30}"></div>
+    <div class="field"><label for="s-carry">Resturlaub aus ${y-1}</label><input id="s-carry" type="number" inputmode="decimal" min="0" max="60" step="0.5" value="${(p?.carry||{})[y]||0}"></div></div>
+    <div class="field"><span class="flabel">Arbeitstage (wichtig bei Teilzeit)</span><div class="days">${[1,2,3,4,5,6].map(d=>`<label><input type="checkbox" value="${d}" ${w.includes(d)?"checked":""}> ${WD[d]}</label>`).join("")}</div></div>
+    <div class="hint">Urlaub wird nur an diesen Tagen gezählt. Wer z. B. nur Mo–Mi arbeitet, braucht für eine ganze Urlaubswoche 3 Tage.</div>
+    <div class="cbox"></div>
+    <div class="actions">${p?`<button class="btn danger" id="del">Entfernen</button>`:""}<div class="right"><button class="btn" id="cancel">Abbrechen</button><button class="btn primary" id="save">Speichern</button></div></div>`,
+  d=>{
+    d.querySelector("#cancel").onclick=close;
+    d.querySelector("#save").onclick=async()=>{const name=d.querySelector("#s-name").value.trim();if(!name){toast("Bitte einen Namen eingeben.");return}
+      const wd=[...d.querySelectorAll(".days input:checked")].map(i=>+i.value);if(!wd.length){toast("Bitte mindestens einen Arbeitstag wählen.");return}
+      const carry={...(p?.carry||{})};carry[y]=Number(d.querySelector("#s-carry").value)||0;
+      const data=strip({name,group:d.querySelector("#s-group").value,days:Number(d.querySelector("#s-days").value)||0,workdays:wd,carry,example:p?.example||undefined});
+      d.querySelector("#save").disabled=true;
+      if(await write(db=>p?db.collection("staff").doc(p.id).set(data):db.collection("staff").add(data),"Gespeichert"))close();else d.querySelector("#save").disabled=false};
+    if(p)d.querySelector("#del").onclick=()=>{const n=S.entries.filter(e=>e.staffId===p.id).length;
+      confirmBox(d,`${esc(p.name)} entfernen?${n?` Dabei werden auch ${n} Einträge gelöscht.`:""}`,"Entfernen",async()=>{
+        const ok=await write(async db=>{for(const e of S.entries.filter(e=>e.staffId===p.id))await db.collection("entries").doc(e.id).delete();await db.collection("staff").doc(p.id).delete()},"Entfernt");if(ok)close()})};
+  })
+}
+
+function openClosure(c){
+  modal(`<h2>${c?"Schließzeit ändern":"Schließzeit eintragen"}</h2>
+    <div class="field"><label for="c-label">Bezeichnung</label><input id="c-label" value="${esc(c?.label||"")}" placeholder="z. B. Betriebsurlaub Sommer" maxlength="60"></div>
+    <div class="row2">${dateField("c-from","Von",c?.from||TODAY,"c-to")}${dateField("c-to","Bis",c?.to||TODAY)}</div>
+    <label class="check"><input type="checkbox" id="c-deduct" ${c?(c.deduct?"checked":""):"checked"}> Vom Urlaub aller abziehen (Betriebsurlaub)</label>
+    <div class="cbox"></div>
+    <div class="actions">${c?`<button class="btn danger" id="del">Löschen</button>`:""}<div class="right"><button class="btn" id="cancel">Abbrechen</button><button class="btn primary" id="save">Speichern</button></div></div>`,
+  d=>{const fr=bindDate(d,"c-from"),to=bindDate(d,"c-to");fr.onCommit(()=>{if(fr.value&&(!to.value||to.value<fr.value))to.value=fr.value});
+    d.querySelector("#cancel").onclick=close;
+    d.querySelector("#save").onclick=async()=>{if(!fr.value||!to.value){toast("Bitte ein gültiges Datum eingeben, z. B. 23.11.2026.");return}
+      if(to.value<fr.value){toast("„Bis“ liegt vor „Von“. Bitte prüfen.");return}
+      const data=strip({label:d.querySelector("#c-label").value.trim()||"Schließzeit",from:fr.value,to:to.value<fr.value?fr.value:to.value,deduct:d.querySelector("#c-deduct").checked,example:c?.example||undefined});
+      if(await write(db=>c?db.collection("closures").doc(c.id).set(data):db.collection("closures").add(data),"Gespeichert"))close()};
+    if(c)d.querySelector("#del").onclick=()=>confirmBox(d,"Diese Schließzeit löschen?","Löschen",async()=>{if(await write(db=>db.collection("closures").doc(c.id).delete(),"Gelöscht"))close()});
+  })
+}
+
+function openFerien(f){
+  modal(`<h2>${f?"Ferien ändern":"Ferien eintragen"}</h2>
+    <div class="field"><label for="fe-label">Bezeichnung</label><input id="fe-label" value="${esc(f?.label||"")}" placeholder="z. B. Osterferien 2027" maxlength="60"></div>
+    <div class="row2">${dateField("fe-from","Von",f?.from||TODAY,"fe-to")}${dateField("fe-to","Bis",f?.to||TODAY)}</div>
+    <div class="cbox"></div>
+    <div class="actions">${f?`<button class="btn danger" id="del">Löschen</button>`:""}<div class="right"><button class="btn" id="cancel">Abbrechen</button><button class="btn primary" id="save">Speichern</button></div></div>`,
+  d=>{const fr=bindDate(d,"fe-from"),to=bindDate(d,"fe-to");fr.onCommit(()=>{if(fr.value&&(!to.value||to.value<fr.value))to.value=fr.value});
+    d.querySelector("#cancel").onclick=close;
+    d.querySelector("#save").onclick=async()=>{if(!fr.value||!to.value){toast("Bitte ein gültiges Datum eingeben, z. B. 23.11.2026.");return}
+      if(to.value<fr.value){toast("„Bis“ liegt vor „Von“. Bitte prüfen.");return}
+      const data={label:d.querySelector("#fe-label").value.trim()||"Schulferien",from:fr.value,to:to.value};
+      if(await write(db=>f?db.collection("ferien").doc(f.id).set(data):db.collection("ferien").add(data),"Gespeichert"))close()};
+    if(f)d.querySelector("#del").onclick=()=>confirmBox(d,"Diese Ferien löschen?","Löschen",async()=>{if(await write(db=>db.collection("ferien").doc(f.id).delete(),"Gelöscht"))close()});
+  })
+}
+
+/* ---------- Excel-Sicherung ---------- */
+let xlsxLoading=null;
+function loadXlsx(){if(window.XLSX)return Promise.resolve();if(xlsxLoading)return xlsxLoading;
+  xlsxLoading=new Promise((res,rej)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";sc.onload=res;sc.onerror=()=>{xlsxLoading=null;rej(new Error("load"))};document.head.appendChild(sc)});return xlsxLoading}
+const dd=s=>s?fmt(s):"";
+async function exportExcel(btn){
+  btn.disabled=true;const old=btn.textContent;btn.textContent="Wird erstellt …";
+  try{await loadXlsx();
+    const gname=k=>(groups().find(g=>g.k===k)||{}).l||"Ohne Team";const pn=id=>(S.staff.find(p=>p.id===id)||{}).name||"(gelöscht)";
+    const wb=XLSX.utils.book_new();const add=(name,rows,widths)=>{const ws=XLSX.utils.aoa_to_sheet(rows);ws["!cols"]=widths.map(w=>({wch:w}));XLSX.utils.book_append_sheet(wb,ws,name)};
+    const es=[...S.entries].sort((a,b)=>a.from.localeCompare(b.from));
+    add("Abwesenheiten",[["Name","Team","Art","Von","Bis","Halber Tag","Arbeitstage","Notiz"],...es.map(e=>{const p=S.staff.find(p=>p.id===e.staffId);
+      return[pn(e.staffId),p?gname(p.group):"",(TYPES.find(t=>t.k===e.type)||{}).l||e.type,dd(e.from),dd(e.to),e.half&&e.from===e.to?"ja":"",p?countWork(p,e.from,e.to,e.half):"",e.note||""]})],[22,18,12,12,12,10,12,40]);
+    const years=[...new Set([S.year,now.getFullYear(),...S.entries.map(e=>+e.from.slice(0,4))])].sort();
+    for(const y of years){add("Konten "+y,[["Name","Team","Urlaubstage","Übertrag Vorjahr","Anspruch gesamt","Genommen","Geplant","Rest","Abwesend","Fortbildung"],
+      ...groups().flatMap(g=>staffSorted(g.k).map(p=>{const a=account(p,y);return[p.name,g.l,a.base,a.carry,a.total,a.taken,a.planned,a.rest,a.krank,a.fort]}))],[22,18,11,14,14,10,10,8,10,11])}
+    add("Team",[["Name","Team","Urlaubstage/Jahr","Arbeitstage"],...groups().flatMap(g=>staffSorted(g.k).map(p=>[p.name,g.l,Number(p.days)||0,workdaysOf(p).map(d=>WD[d]).join(", ")]))],[22,18,16,24]);
+    add("Teams",[["Team","Mindestbesetzung"],...groups().filter(g=>!g.none).map(g=>[g.l,g.min||0])],[22,16]);
+    add("Schließzeiten",[["Bezeichnung","Von","Bis","Vom Urlaub abziehen"],...S.closures.map(c=>[c.label||"",dd(c.from),dd(c.to),c.deduct?"ja":"nein"])],[30,12,12,18]);
+    add("Schulferien",[["Bezeichnung","Von","Bis"],...[...S.ferien].sort((a,b)=>a.from.localeCompare(b.from)).map(f=>[f.label||"",dd(f.from),dd(f.to)])],[30,12,12]);
+    add("Notizen",[["Notiz","Erstellt"],...S.notes.map(n=>[n.text,n.created?fmtStamp(n.created):""])],[60,26]);
+    const data=XLSX.write(wb,{type:"array",bookType:"xlsx"});
+    const blob=new Blob([data],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=`Urlaubsplan_${TODAY}.xlsx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove()},1500);toast("Excel-Datei erstellt")}
+  catch(e){if(e&&e.code==="declined"){}else toast(e&&e.message==="load"?"Excel-Funktion konnte nicht geladen werden. Bitte Internet prüfen.":"Excel-Datei konnte nicht erstellt werden.")}
+  finally{btn.disabled=false;btn.textContent=old}
+}
+
+async function removeExamples(){
+  const b=$("#rmEx");if(b)b.disabled=true;
+  await write(async db=>{
+    for(const e of S.entries.filter(e=>e.example||S.staff.find(p=>p.id===e.staffId&&p.example)))await db.collection("entries").doc(e.id).delete();
+    for(const p of S.staff.filter(p=>p.example))await db.collection("staff").doc(p.id).delete();
+    for(const c of S.closures.filter(c=>c.example))await db.collection("closures").doc(c.id).delete();
+  },"Beispiele entfernt");
+}
+
+/* ---------- Daten laden ---------- */
+/* ---------- Anmeldung & Daten (Firebase, siehe unten) ---------- */
+S.auth="loading";S.unsubs=[];
+const FERIEN_NRW=[
+  {label:"Weihnachtsferien 2025/26",from:"2025-12-22",to:"2026-01-06"},{label:"Osterferien 2026",from:"2026-03-30",to:"2026-04-11"},
+  {label:"Pfingstferien 2026",from:"2026-05-26",to:"2026-05-26"},{label:"Sommerferien 2026",from:"2026-07-20",to:"2026-09-01"},
+  {label:"Herbstferien 2026",from:"2026-10-17",to:"2026-10-31"},{label:"Weihnachtsferien 2026/27",from:"2026-12-23",to:"2027-01-06"},
+  {label:"Osterferien 2027",from:"2027-03-22",to:"2027-04-03"},{label:"Pfingstferien 2027",from:"2027-05-18",to:"2027-05-18"},
+  {label:"Sommerferien 2027",from:"2027-07-19",to:"2027-08-31"},{label:"Herbstferien 2027",from:"2027-10-23",to:"2027-11-06"},
+  {label:"Weihnachtsferien 2027/28",from:"2027-12-24",to:"2028-01-08"}];
+const COLLS=["staff","entries","closures","groups","notes","ferien"];
+function resetData(){S.unsubs.forEach(f=>{try{f()}catch(e){}});S.unsubs=[];for(const c of COLLS){S[c]=[];S.loaded[c]=0}S.db=null;S.error=null;lastUndo=null;$("#undoBtn").hidden=true}
+function appSignedIn(user,db){resetData();S.user=user;S.auth="in";S.db=db;S.canWrite=true;
+  const timer=setTimeout(()=>{if(!loaded()){S.error="timeout";render()}},12000);
+  for(const name of COLLS){
+    S.unsubs.push(db.collection(name).onSnapshot(snap=>{S[name]=snap.docs.map(d=>({...d.data(),id:d.id}));S.loaded[name]=1;if(loaded()){clearTimeout(timer);S.error=null}render()},
+      err=>{console.error(err);if(!loaded())S.error=err&&err.code==="permission-denied"?"rules":"timeout";render()}))}
+  render()}
+function appSignedOut(){resetData();S.user=null;S.auth="out";close();render()}
+function appAuthError(e){const c=e&&e.code||"";if(c==="auth/popup-closed-by-user"||c==="auth/cancelled-popup-request")return;
+  toast(c==="auth/unauthorized-domain"?"Diese Adresse ist in Firebase noch nicht freigegeben.":c==="auth/operation-not-allowed"?"Google-Anmeldung ist in Firebase noch nicht aktiviert.":c==="auth/network-request-failed"?"Keine Internetverbindung.":"Anmeldung fehlgeschlagen. Bitte erneut versuchen.");console.error(e)}
+function renderLogin(m){
+  m.innerHTML=`<div class="login"><div class="panel loginbox">
+    <img class="appicon" src="icons/icon-192.png" alt="" width="84" height="84">
+    <h2>Willkommen</h2>
+    <p>Melde dich mit deinem Google-Konto an. Deine Planung ist nur für dich sichtbar, andere sehen sie nicht.</p>
+    <button class="gbtn" id="gSignIn"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Mit Google anmelden</button>
+  </div></div>`;
+  $("#gSignIn").onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{await window.fbSignIn()}catch(err){appAuthError(err)}finally{b.disabled=false}}}
+function openAccount(){if(!S.user)return;
+  modal(`<div class="acctinfo">${S.user.photo?`<img src="${esc(S.user.photo)}" alt="" referrerpolicy="no-referrer">`:""}<div><b>${esc(S.user.name||"")}</b><div class="meta">${esc(S.user.email||"")}</div></div></div>
+    <div class="hint">Alle Daten in dieser App gehören nur zu diesem Google-Konto. Wer sich mit einem anderen Konto anmeldet, sieht eine eigene, leere Planung.</div>
+    <div class="actions"><button class="btn danger" id="logout">Abmelden</button><div class="right"><button class="btn" id="cancel">Schließen</button></div></div>`,
+  d=>{d.querySelector("#cancel").onclick=close;d.querySelector("#logout").onclick=async()=>{try{await window.fbSignOut()}catch(e){toast("Abmelden fehlgeschlagen.")}}})}
+$("#acctBtn").onclick=openAccount;
+render();
+</script>
+
+<script type="module">
+/* Firebase: Google-Anmeldung + Firestore. Jede Person hat ihren eigenen Bereich unter urlaubsplan/{uid}/… */
+import { firebaseConfig } from "./firebase-config.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, onSnapshot, addDoc, setDoc, updateDoc, deleteDoc, getDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const app = initializeApp(firebaseConfig);
+let fs;
+try { fs = initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) }); }
+catch (e) { fs = initializeFirestore(app, {}); }
+const auth = getAuth(app);
+auth.languageCode = "de";
+
+/* Gleiche Schnittstelle wie bisher: db.collection(name).doc(id).set/update/delete, .add, .onSnapshot */
+function scoped(uid) {
+  const col = name => collection(fs, "urlaubsplan", uid, name);
+  return { collection: name => ({
+    onSnapshot: (next, err) => onSnapshot(col(name), snap => next({ docs: snap.docs.map(d => ({ id: d.id, data: () => d.data() })) }), err),
+    add: v => addDoc(col(name), v),
+    doc: id => { const r = doc(col(name), id); return { set: v => setDoc(r, v), update: v => updateDoc(r, v), delete: () => deleteDoc(r) }; }
+  }) };
+}
+/* Beim ersten Anmelden: Standard-Teams und Schulferien NRW anlegen */
+async function ensureSetup(uid) {
+  const r = doc(fs, "urlaubsplan", uid, "meta", "setup");
+  if ((await getDoc(r)).exists()) return;
+  const b = writeBatch(fs);
+  DEFAULT_GROUPS.forEach((g, i) => b.set(doc(fs, "urlaubsplan", uid, "groups", g.k), { label: g.l, order: i, min: 0 }));
+  FERIEN_NRW.forEach(f => b.set(doc(collection(fs, "urlaubsplan", uid, "ferien")), f));
+  b.set(r, { created: new Date().toISOString() });
+  await b.commit();
+}
+onAuthStateChanged(auth, async u => {
+  if (!u) { appSignedOut(); return; }
+  appSignedIn({ name: u.displayName, email: u.email, photo: u.photoURL }, scoped(u.uid));
+  try { await ensureSetup(u.uid); } catch (e) { console.warn("Einrichtung:", e); }
+});
+window.fbSignIn = async () => {
+  const p = new GoogleAuthProvider();
+  p.setCustomParameters({ prompt: "select_account" });
+  try { await signInWithPopup(auth, p); }
+  catch (e) {
+    if (e.code === "auth/popup-blocked" || e.code === "auth/operation-not-supported-in-this-environment") return signInWithRedirect(auth, p);
+    throw e;
+  }
+};
+window.fbSignOut = () => signOut(auth);
+getRedirectResult(auth).catch(appAuthError);
+</script>
+</body>
+</html>
