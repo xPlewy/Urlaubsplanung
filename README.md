@@ -23,9 +23,9 @@ und die Schulferien NRW automatisch angelegt.
 1. **Google-Anmeldung einschalten:** Firebase Console → *Authentication* → *Sign-in method* → *Google* aktivieren.
 2. **Adresse freigeben:** *Authentication* → *Settings* → *Authorized domains* → `xplewy.github.io` hinzufügen.
 3. **Datenbank anlegen:** *Firestore Database* → *Datenbank erstellen* (Standort z. B. `europe-west3`, Frankfurt).
-4. **Regeln eintragen:** *Firestore Database* → *Regeln*. Den Block `match /urlaubsplan/...` aus
+4. **Regeln eintragen:** *Firestore Database* → *Regeln*. Den Inhalt von
    [`firestore.rules`](firestore.rules) einfügen und *Veröffentlichen*.
-   Gibt es dort schon Regeln für eine andere App, diese **nicht löschen**, sondern den Block nur dazuschreiben.
+   Am einfachsten den ganzen Inhalt von `firestore.rules` hineinkopieren (das Projekt gehört nur dieser App).
 
 ## Veröffentlichen mit GitHub Pages
 
