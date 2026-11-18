@@ -30,7 +30,7 @@ und die Schulferien NRW automatisch angelegt.
 ## Veröffentlichen mit GitHub Pages
 
 GitHub → Repository → *Settings* → *Pages* → *Source: Deploy from a branch* → Branch `main`, Ordner `/ (root)`.
-Die App ist dann unter `https://xplewy.github.io/urlaubsplanung/` erreichbar.
+Die App ist dann unter `https://xplewy.github.io/Urlaubsplanung/` erreichbar.
 
 ## Auf dem iPhone installieren
 
